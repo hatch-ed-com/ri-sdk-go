@@ -58,6 +58,8 @@ type GetConnectFilesOutput struct {
 // Retrieves metadata for files within the Connect files
 // module and logs. This does NOT retrieve the file contents
 // only the metadata as shown in the GetConnectFilesOutput
+//
+//meta:operation GET /admin/connect/files/{path}
 func (c *Client) GetConnectFiles(getConnectFilesInput GetConnectFilesInput) (*GetConnectFilesOutput, error) {
 	var output GetConnectFilesOutput
 

@@ -30,6 +30,8 @@ type GetConnectFileContentInput struct {
 
 // Retrieves file content from a file within the Connect files
 // module and logs.
+//
+//meta:operation GET /admin/connect/fileContent/{path}
 func (c *Client) GetConnectFileContent(params GetConnectFileContentInput) ([]byte, error) {
 	url := fmt.Sprintf("%s/admin/connect/fileContent/%s?project=%s&decompress=%t", c.baseEndpoint, params.Path, params.Project, params.Decompress)
 	req, err := c.GenerateRequest("GET", url, nil)

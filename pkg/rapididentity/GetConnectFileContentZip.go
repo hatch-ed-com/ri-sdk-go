@@ -18,6 +18,8 @@ type GetConnectFileContentZip struct {
 
 // Retrieves multiple files zipped from the Connect files
 // module and logs.
+//
+//meta:operation GET /admin/connect/fileContentZip
 func (c *Client) GetConnectFileContentZip(params GetConnectFileContentZip) ([]byte, error) {
 	url := fmt.Sprintf("%s/admin/connect/fileContentZip?project=%s", c.baseEndpoint, params.Project)
 	for _, path := range params.PathList {
