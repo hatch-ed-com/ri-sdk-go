@@ -32,7 +32,7 @@ func (c *Client) GetConnectFileContentZip(params GetConnectFileContentZip) ([]by
 
 	req.Header.Set("Accept", "application/zip")
 
-	res, err := c.options.HTTPClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

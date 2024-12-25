@@ -209,7 +209,7 @@ func (c *Client) RunAuditReport(params RunAuditReportInput) (*RunAuditReportOutp
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	res, err := c.options.HTTPClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

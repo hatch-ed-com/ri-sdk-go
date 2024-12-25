@@ -45,7 +45,7 @@ func (c *Client) GetConnectFileContent(params GetConnectFileContentInput) ([]byt
 		req.Header.Set("Accept", "text/plain")
 	}
 
-	res, err := c.options.HTTPClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -73,7 +73,7 @@ func (c *Client) GetConnectFiles(getConnectFilesInput GetConnectFilesInput) (*Ge
 		req.Header.Set("Accept", getConnectFilesInput.ResponseType)
 	}
 
-	res, err := c.options.HTTPClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

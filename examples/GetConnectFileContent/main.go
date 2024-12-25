@@ -2,30 +2,38 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity"
 )
 
 func main() {
+	baseUrl, err := url.Parse(os.Getenv("RI_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	options := rapididentity.Options{
-		HTTPClient:      http.Client{},
-		HostUrl:         "https://portal.us001-rapididentity.com",
-		ServiceIdentity: "service_identity_key",
+		HTTPClient:      &http.Client{},
+		BaseUrl:         baseUrl,
+		ServiceIdentity: os.Getenv("RI_KEY"),
 	}
 
 	client := rapididentity.New(options)
 
 	input := rapididentity.GetConnectFileContentInput{
-		Path:         "log/jobs/GitCloneProject/2024-12-23/2024-12-23-00_31_12.870.html.gz",
-		Project:      "gitops",
+		Path:         "log/run/RESTPointAPIGateway/2024-09-09/2024-09-09-16_18_24.798.html.gz",
+		Project:      "sec_mgr",
 		Decompress:   true,
 		ResponseType: "text/html",
 	}
 
 	output, err := client.GetConnectFileContent(input)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	fmt.Printf("%s\n", output)

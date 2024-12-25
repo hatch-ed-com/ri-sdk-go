@@ -6,6 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+)
+
+const (
+	Version          = "v1.0.0"
+	defaultUserAgent = "ri-sdk-go" + "/" + Version
 )
 
 // Configurable options for the RapidIdentity
@@ -13,7 +19,7 @@ import (
 type Options struct {
 	// The http client to use to make requests
 	// to the RapidIdentity REST API
-	HTTPClient http.Client
+	HTTPClient *http.Client
 
 	// The service identity key to use for authorization.
 	// See https://help.rapididentity.com/docs/service-identities-in-rapididentity
@@ -23,13 +29,19 @@ type Options struct {
 	// The rapididentity base host url.
 	// For example https://portal.us001-rapididentity.com.
 	// Do NOT add a trailing slash
-	HostUrl string
+	BaseUrl *url.URL
+
+	// The user agent to used in requests.
+	// The default is the ri-sdk-go user agent
+	UserAgent string
 }
 
 // Client to make RapidIdentity REST API Calls.
 type Client struct {
-	options      Options
-	baseEndpoint string
+	httpClient         *http.Client
+	serviceIdentityKey string
+	userAgent          string
+	baseEndpoint       string
 }
 
 // Generates a base RapidIdentity API request that
@@ -40,7 +52,8 @@ func (c *Client) GenerateRequest(method string, url string, body io.Reader) (*ht
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+c.options.ServiceIdentity)
+	req.Header.Add("Authorization", "Bearer "+c.serviceIdentityKey)
+	req.Header.Add("UserAgent", c.userAgent)
 	req.Header.Add("Accept", "application/json")
 
 	return req, nil
@@ -65,9 +78,14 @@ func (c *Client) ReceiveResponse(res *http.Response) ([]byte, error) {
 // Creates a new RapidIdentity Client
 // with the provided options
 func New(options Options) *Client {
-	baseEndpoint := fmt.Sprintf("%s/api/rest", options.HostUrl)
+	if options.UserAgent == "" {
+		options.UserAgent = defaultUserAgent
+	}
+	baseEndpoint := fmt.Sprintf("%s/api/rest", options.BaseUrl)
 	return &Client{
-		options:      options,
-		baseEndpoint: baseEndpoint,
+		serviceIdentityKey: options.ServiceIdentity,
+		httpClient:         options.HTTPClient,
+		userAgent:          options.UserAgent,
+		baseEndpoint:       baseEndpoint,
 	}
 }
