@@ -41,7 +41,7 @@ import (
 
 func main() {
 	options := rapididentity.Options{
-		HTTPClient:      http.Client{},
+		HTTPClient:      &http.Client{},
 		BaseUrl:         "https://portal.us001-rapididentity.com",
 		ServiceIdentity: "service_identity_key",
 	}
