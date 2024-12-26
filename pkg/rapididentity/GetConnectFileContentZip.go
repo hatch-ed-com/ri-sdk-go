@@ -4,7 +4,7 @@ import "fmt"
 
 // Input for retrieving multiple files zipped from the
 // Connect files module and logs
-type GetConnectFileContentZip struct {
+type GetConnectFileContentZipInput struct {
 	// An array of paths to the files to retrieve.
 	// This can also be used to retrieve job and run logs
 	// by setting the path to log/job or log/run.
@@ -20,7 +20,7 @@ type GetConnectFileContentZip struct {
 // module and logs.
 //
 //meta:operation GET /admin/connect/fileContentZip
-func (c *Client) GetConnectFileContentZip(params GetConnectFileContentZip) ([]byte, error) {
+func (c *Client) GetConnectFileContentZip(params GetConnectFileContentZipInput) ([]byte, error) {
 	url := fmt.Sprintf("%s/admin/connect/fileContentZip?project=%s", c.baseEndpoint, params.Project)
 	for _, path := range params.PathList {
 		url = fmt.Sprintf("%s&path=%s", url, path)

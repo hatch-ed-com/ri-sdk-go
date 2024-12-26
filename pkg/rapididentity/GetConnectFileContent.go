@@ -40,9 +40,9 @@ func (c *Client) GetConnectFileContent(params GetConnectFileContentInput) ([]byt
 	}
 
 	if params.ResponseType == "" {
-		req.Header.Set("Accept", params.ResponseType)
-	} else {
 		req.Header.Set("Accept", "text/plain")
+	} else {
+		req.Header.Set("Accept", params.ResponseType)
 	}
 
 	res, err := c.httpClient.Do(req)
