@@ -23,7 +23,7 @@
 //	func main() {
 //		options := rapididentity.Options{
 //			HTTPClient:      http.Client{},
-//			HostUrl:         "https://portal.us001-rapididentity.com",
+//			BaseUrl:         "https://portal.us001-rapididentity.com",
 //			ServiceIdentity: "service_identity_key",
 //		}
 //
