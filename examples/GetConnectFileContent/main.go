@@ -33,6 +33,10 @@ func main() {
 
 	output, err := client.GetConnectFileContent(input)
 	if err != nil {
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+		}
 		log.Fatal(err)
 	}
 

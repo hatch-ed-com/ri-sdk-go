@@ -71,7 +71,11 @@ func (c *Client) ReceiveResponse(res *http.Response) ([]byte, error) {
 	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return resBody, nil
 	} else {
-		return nil, fmt.Errorf("status code %d. %s", res.StatusCode, resBody)
+		return nil, RapidIdentityError{
+			ReqUrl:  res.Request.URL,
+			Message: string(resBody),
+			Code:    res.StatusCode,
+		}
 	}
 }
 
@@ -88,4 +92,16 @@ func New(options Options) *Client {
 		userAgent:          options.UserAgent,
 		baseEndpoint:       baseEndpoint,
 	}
+}
+
+// Error message to be used for additional
+// information for all endpoints
+type RapidIdentityError struct {
+	ReqUrl  *url.URL
+	Message string
+	Code    int
+}
+
+func (re RapidIdentityError) Error() string {
+	return re.Message
 }

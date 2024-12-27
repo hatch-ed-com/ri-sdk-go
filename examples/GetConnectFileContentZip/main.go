@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -35,7 +34,11 @@ func main() {
 
 	output, err := client.GetConnectFileContentZip(input)
 	if err != nil {
-		fmt.Println(err)
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+		}
+		log.Fatal(err)
 	}
 
 	f, _ := os.Create("myFiles.zip")

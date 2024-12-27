@@ -55,7 +55,11 @@ func main() {
 
 	output, err := client.GetConnectFiles(input)
 	if err != nil {
-		fmt.Println(err)
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+		}
+		log.Fatal(err)
 	}
 
 	fmt.Printf("%+v\n", output)
