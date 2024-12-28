@@ -65,15 +65,23 @@ func (c *Client) ReceiveResponse(res *http.Response) ([]byte, error) {
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, RapidIdentityError{
+			Method:  res.Request.Method,
+			ReqUrl:  res.Request.URL,
+			Message: string(resBody),
+			Reason:  err.Error(),
+			Code:    res.StatusCode,
+		}
 	}
 
 	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return resBody, nil
 	} else {
 		return nil, RapidIdentityError{
+			Method:  res.Request.Method,
 			ReqUrl:  res.Request.URL,
 			Message: string(resBody),
+			Reason:  string(resBody),
 			Code:    res.StatusCode,
 		}
 	}
@@ -97,8 +105,10 @@ func New(options Options) *Client {
 // Error message to be used for additional
 // information for all endpoints
 type RapidIdentityError struct {
+	Method  string
 	ReqUrl  *url.URL
 	Message string
+	Reason  string
 	Code    int
 }
 
