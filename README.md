@@ -46,7 +46,14 @@ func main() {
 		ServiceIdentity: "service_identity_key",
 	}
 
-	client := rapididentity.New(options)
+	client, err := rapididentity.New(options)
+	if err != nil {
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+		}
+		log.Fatal(err)
+	}
 
 	input := rapididentity.GetConnectFilesInput{
 		Path:    "/",
