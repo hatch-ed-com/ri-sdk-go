@@ -21,15 +21,16 @@ type AggregatedDelegation struct {
 }
 
 type User struct {
-	Id            string   `json:"id"`
-	Dn            string   `json:"dn"`
-	Username      string   `json:"username"`
-	FirstName     string   `json:"firstName"`
-	LastName      string   `json:"lastName"`
-	Email         string   `json:"email"`
-	Distinguisher string   `json:"distinguisher"`
-	ImageUrl      string   `json:"imageUrl"`
-	MobileNumbers []string `json:"mobileNumbers"`
+	Id             string   `json:"id"`
+	Dn             string   `json:"dn"`
+	Username       string   `json:"username"`
+	FirstName      string   `json:"firstName"`
+	LastName       string   `json:"lastName"`
+	Email          string   `json:"email"`
+	Distinguisher  string   `json:"distinguisher"`
+	ImageUrl       string   `json:"imageUrl"`
+	MobileNumbers  []string `json:"mobileNumbers"`
+	AlternateEmail string   `json:"alternateEmail"`
 }
 
 type DelegationProfile struct {
