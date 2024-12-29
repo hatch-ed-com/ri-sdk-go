@@ -57,5 +57,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", output.AggregatedDelegation.DelegationProfiles[0].Profile)
+	fmt.Printf("%+v\n", output)
 }
