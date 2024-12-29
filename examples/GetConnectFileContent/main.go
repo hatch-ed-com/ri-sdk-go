@@ -22,7 +22,14 @@ func main() {
 		ServiceIdentity: os.Getenv("RI_KEY"),
 	}
 
-	client := rapididentity.New(options)
+	client, err := rapididentity.New(options)
+	if err != nil {
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+		}
+		log.Fatal(err)
+	}
 
 	input := rapididentity.GetConnectFileContentInput{
 		Path:         "log/run/RESTPointAPIGateway/2024-09-09/2024-09-09-16_18_24.798.html.gz",

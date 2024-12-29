@@ -16,12 +16,28 @@ func main() {
 		log.Fatal(err)
 	}
 	options := rapididentity.Options{
-		HTTPClient:      &http.Client{},
-		BaseUrl:         baseUrl,
-		ServiceIdentity: os.Getenv("RI_KEY"),
+		HTTPClient: &http.Client{},
+		BaseUrl:    baseUrl,
+		RapidIdentityUser: &rapididentity.RapidIdentityUser{
+			Username: os.Getenv("RI_USER"),
+			Password: os.Getenv("RI_PWD"),
+		},
 	}
 
-	client := rapididentity.New(options)
+	client, err := rapididentity.New(options)
+	if err != nil {
+		riError, ok := err.(rapididentity.RapidIdentityError)
+		if ok {
+			log.Fatalf("Method: %s, Request URL: %s, Status Code: %d, Message: %s, Reason: %s",
+				riError.Method,
+				riError.ReqUrl,
+				riError.Code,
+				riError.Message,
+				riError.Reason)
+		}
+		log.Fatal(err)
+	}
+	defer client.Close()
 
 	input := rapididentity.GetDelegationsForUserInput{
 		UserId: "08b5f0ec-d56a-4712-ada5-c86074ab11db",
@@ -41,5 +57,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", output)
+	fmt.Printf("%+v\n", output.AggregatedDelegation.DelegationProfiles[0].Profile)
 }
