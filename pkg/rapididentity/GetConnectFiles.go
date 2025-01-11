@@ -31,9 +31,9 @@ type FileEntry struct {
 	// The size of the file in bytes
 	Size int `json:"size"`
 
-	// The unix timestamp of when the file or directory
-	// was modified
-	Timestamp int `json:"timestamp"`
+	// The unix timestamp in milliseconds of when the
+	// file or directory was modified
+	Timestamp int64 `json:"timestamp"`
 
 	// The Connect project where the file or directory resides
 	Project string `json:"project"`
