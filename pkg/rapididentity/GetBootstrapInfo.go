@@ -7,25 +7,26 @@ import (
 )
 
 type GetBootstrapInfoOutput struct {
-	LicenseInfo             LicenseInfo  `json:"licenseInfo"`
-	VersionInfo             VersionInfo  `json:"versionInfo"`
-	SessionInfo             SessionInfo  `json:"sessionInfo"`
-	ModuleInfo              ModuleInfo   `json:"moduleInfo"`
-	UIInfo                  UIInfo       `json:"uiInfo"`
-	DefaultLandingModule    string       `json:"defaultLandingModule"`
-	DisableUpgradesRestarts bool         `json:"disableUpgradesRestarts"`
-	AllowProxy              bool         `json:"allowProxy"`
-	Idaas                   bool         `json:"idaas"`
-	TenantId                string       `json:"tenantId"`
-	NotificationEnabled     bool         `json:"notificationEnabled"`
-	GlobalSearchEnabled     bool         `json:"globalSearchEnabled"`
-	IsRICloudLdap           bool         `json:"isRICloudLdap"`
-	Features                FeatureInfo  `json:"features"`
-	HasPersonas             bool         `json:"hasPersonas"`
-	ShieldIdInfo            ShieldIdInfo `json:"shieldIdInfo"`
-	IdHub                   bool         `json:"idHub"`
-	IsIdAutoGoogleEnabled   bool         `json:"isIdAutoGoogleEnabled"`
-	IsIdAutoAppleEnabled    bool         `json:"isIdAutoAppleEnabled"`
+	LicenseInfo             LicenseInfo    `json:"licenseInfo"`
+	VersionInfo             VersionInfo    `json:"versionInfo"`
+	SessionInfo             SessionInfo    `json:"sessionInfo"`
+	ModuleInfo              ModuleInfo     `json:"moduleInfo"`
+	UIInfo                  UIInfo         `json:"uiInfo"`
+	DefaultLandingModule    string         `json:"defaultLandingModule"`
+	DisableUpgradesRestarts bool           `json:"disableUpgradesRestarts"`
+	AllowProxy              bool           `json:"allowProxy"`
+	Idaas                   bool           `json:"idaas"`
+	TenantId                string         `json:"tenantId"`
+	NotificationsEnabled    bool           `json:"notificationsEnabled"`
+	GlobalSearchEnabled     bool           `json:"globalSearchEnabled"`
+	IsRICloudLdap           bool           `json:"isRICloudLdap"`
+	Features                FeatureInfo    `json:"features"`
+	DepotProxy              DepotProxyInfo `json:"depotProxy"`
+	HasPersonas             bool           `json:"hasPersonas"`
+	ShieldIdInfo            ShieldIdInfo   `json:"shieldIdInfo"`
+	IdHub                   bool           `json:"idHub"`
+	IsIdAutoGoogleEnabled   bool           `json:"isIdAutoGoogleEnabled"`
+	IsIdAutoAppleEnabled    bool           `json:"isIdAutoAppleEnabled"`
 }
 
 type LicenseInfo struct {
@@ -45,21 +46,21 @@ type VersionInfo struct {
 
 type ModuleInfo struct {
 	Applications  ApplicationModuleInfo   `json:"applications"`
-	Dashboard     ModuleLicenseInfo       `json:"dashboard"`
-	DashboardV2   ModuleLicenseInfo       `json:"dashboard_V2"`
+	Dashboard     DashboardModuleInfo     `json:"dashboard"`
+	DashboardV2   DashboardV2ModuleInfo   `json:"dashboard_V2"`
 	Files         FileModuleInfo          `json:"files"`
 	Profiles      ProfileModuleInfo       `json:"profiles"`
-	Reporting     ModuleLicenseInfo       `json:"reporting"`
-	Roles         ModuleLicenseInfo       `json:"roles"`
-	Sponsorship   ModuleLicenseInfo       `json:"sponsorship"`
+	Reporting     ReportingModuleInfo     `json:"reporting"`
+	Roles         RolesModuleInfo         `json:"roles"`
+	Sponsorship   SponsorshipModuleInfo   `json:"sponsorship"`
 	Workflow      WorkflowModuleInfo      `json:"workflow"`
-	Admin         ModuleLicenseInfo       `json:"admin"`
-	Connect       ModuleLicenseInfo       `json:"connect"`
+	Admin         AdminModuleInfo         `json:"admin"`
+	Connect       ConnectModuleInfo       `json:"connect"`
 	Studio        StudioModuleInfo        `json:"studio"`
-	Folders       ModuleLicenseInfo       `json:"folders"`
+	Folders       FoldersModuleInfo       `json:"folders"`
 	Insights      InsightsModuleInfo      `json:"insights"`
 	Configuration ConfigurationModuleInfo `json:"configuration"`
-	IdHub         ModuleLicenseInfo       `json:"idHub"`
+	IdHub         IdHubModuleInfo         `json:"idHub"`
 }
 
 type ApplicationModuleInfo struct {
@@ -79,8 +80,33 @@ type TabInfo struct {
 	Visible bool `json:"visible"`
 }
 
+type TabActionInfo struct {
+	TabInfo
+	Actions []string `json:"actions"`
+}
+
+type TabAdminInfo struct {
+	ConfigTabVisible bool `json:"configTabVisible"`
+	AdminTabVisible  bool `json:"adminTabVisible"`
+}
+
 type PreferenceInfo struct {
 	StartAtFavorites bool `json:"startAtFavorites"`
+}
+
+type DashboardModuleInfo struct {
+	ModuleLicenseInfo
+	MyActivityTab        TabInfo `json:"myActivityTab"`
+	TeamActivityTab      TabInfo `json:"teamActivityTab"`
+	OtherActivityTab     TabInfo `json:"otherActivityTab"`
+	MyEntitlementsTab    TabInfo `json:"myEntitlementsTab"`
+	TeamEntitlementsTab  TabInfo `json:"teamEntitlementsTab"`
+	OtherEntitlementsTab TabInfo `json:"otherEntitlementsTab"`
+	ExecutiveTab         TabInfo `json:"executiveTab"`
+}
+
+type DashboardV2ModuleInfo struct {
+	ModuleLicenseInfo
 }
 
 type FileModuleInfo struct {
@@ -101,6 +127,38 @@ type ProfileModuleInfo struct {
 	DelegationAttrRequired             bool   `json:"delegationAttrRequired"`
 }
 
+type ReportingModuleInfo struct {
+	ModuleLicenseInfo
+	AuditReportMax int `json:"auditReportMax"`
+}
+
+type RolesModuleInfo struct {
+	ModuleLicenseInfo
+	EnableGroupTypeSelection bool                  `json:"enableGroupTypeSelection"`
+	PossibleGroupTypes       []string              `json:"possibleGroupTypes"`
+	AllowedGroupTypes        []string              `json:"allowedGroupTypes"`
+	PreloadGroups            bool                  `json:"preloadGroups"`
+	ShowDN                   bool                  `json:"showDN"`
+	MyTabInfo                TabActionInfo         `json:"myTabInfo"`
+	TeamTabInfo              TabActionInfo         `json:"teamTabInfo"`
+	OtherTabInfo             TabActionInfo         `json:"otherTabInfo"`
+	CustomAttributes         []DelegationAttribute `json:"customAttributes"`
+	EnableWildcardSearch     bool                  `json:"enableWildcardSearch"`
+}
+
+type SponsorshipModuleInfo struct {
+	ModuleLicenseInfo
+	MyTabInfo                TabActionInfo         `json:"myTabInfo"`
+	TeamTabInfo              TabActionInfo         `json:"teamTabInfo"`
+	OtherTabInfo             TabActionInfo         `json:"otherTabInfo"`
+	MaxExpirationDays        int                   `json:"maxExpirationDays"`
+	EmailAddressRequired     bool                  `json:"emailAddressRequired"`
+	ExpirationRequired       bool                  `json:"expirationRequired"`
+	PreloadSponsors          bool                  `json:"preloadSponsors"`
+	PreloadSponsoredAccounts bool                  `json:"preloadSponsoredAccounts"`
+	CustomAttributes         []DelegationAttribute `json:"customAttributes"`
+}
+
 type WorkflowModuleInfo struct {
 	ModuleLicenseInfo
 	EnableSSLUpload               bool    `json:"enableSSLUpload"`
@@ -118,10 +176,35 @@ type WorkflowModuleInfo struct {
 	TaskManagerTabInfo            TabInfo `json:"taskManagerTabInfo"`
 }
 
+type AdminModuleInfo struct {
+	Visible      bool
+	Portal       TabAdminInfo `json:"portal"`
+	Applications TabAdminInfo `json:"applications"`
+	Dashboard    TabAdminInfo `json:"dashboard"`
+	Files        TabAdminInfo `json:"files"`
+	Profiles     TabAdminInfo `json:"profiles"`
+	Reporting    TabAdminInfo `json:"reporting"`
+	Roles        TabAdminInfo `json:"roles"`
+	Sponsorship  TabAdminInfo `json:"sponsorship"`
+	Workflow     TabAdminInfo `json:"workflow"`
+}
+
+type ConnectModuleInfo struct {
+	Visible bool `json:"visible"`
+}
+
 type StudioModuleInfo struct {
 	ModuleLicenseInfo
 	IsOperator bool `json:"isOperator"`
 	IsAdmin    bool `json:"isAdmin"`
+}
+
+type FoldersModuleInfo struct {
+	UsersVisible   bool `json:"usersVisible"`
+	GroupsVisible  bool `json:"groupsVisible"`
+	IsOperator     bool `json:"isOperator"`
+	IsAdmin        bool `json:"isAdmin"`
+	SchemaUpToDate bool `json:"schemaUpToDate"`
 }
 
 type InsightsModuleInfo struct {
@@ -133,6 +216,13 @@ type InsightsModuleInfo struct {
 type ConfigurationModuleInfo struct {
 	ModuleLicenseInfo
 	AuditTabInfo TabInfo `json:"auditTabInfo"`
+}
+
+type IdHubModuleInfo struct {
+	Visible                 bool   `json:"visible"`
+	LcsExternalAuthClientId string `json:"lcsExternalAuthClientId"`
+	LcsDomain               string `json:"lcsDomain"`
+	CatalogDomain           string `json:"catalogDomain"`
 }
 
 type UIInfo struct {
@@ -147,14 +237,31 @@ type UIInfo struct {
 }
 
 type FeatureInfo struct {
-	LoginConfigs     bool `json:"loginConfigs"`
-	SsoPortal        bool `json:"ssoPortal"`
-	ThirdPartyPortal bool `json:"thirdPartyPortal"`
-	SafeId           bool `json:"safeId"`
-	ShieldId         bool `json:"shieldId"`
-	IdHub            bool `json:"idHub"`
-	PasswordVault    bool `json:"passwordVault"`
-	ProxyAs          bool `json:"proxyAs"`
+	LoginConfigs     bool          `json:"loginConfigs"`
+	Pendo            PendoInfo     `json:"pendo"`
+	ChurnZero        ChurnZeroInfo `json:"churnZero"`
+	SsoPortal        bool          `json:"ssoPortal"`
+	ThirdPartyPortal bool          `json:"thirdPartyPortal"`
+	SafeId           bool          `json:"safeId"`
+	ShieldId         bool          `json:"shieldId"`
+	IdHub            bool          `json:"idHub"`
+	PasswordVault    bool          `json:"passwordVault"`
+	ProxyAs          bool          `json:"proxyAs"`
+}
+
+type PendoInfo struct {
+	Id       string `json:"id"`
+	UserType string `json:"userType"`
+}
+
+type ChurnZeroInfo struct {
+	Id       string `json:"id"`
+	UserType string `json:"userType"`
+	UserRole string `json:"userRole"`
+}
+
+type DepotProxyInfo struct {
+	VettedStudioAppsUrl string `json:"vettedStudioAppsUrl"`
 }
 
 type ShieldIdInfo struct {
