@@ -29,6 +29,7 @@ func main() {
 		}
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	output, err := client.GetBootstrapInfo()
 	if err != nil {
