@@ -54,7 +54,7 @@ func (ap *AuthenticationPolicy) UnmarshalJSON(b []byte) error {
 		case "id":
 			ap.Id = apv.(string)
 		case "version":
-			ap.Version = apv.(int)
+			ap.Version = int(apv.(float64))
 		case "name":
 			ap.Name = apv.(string)
 		case "enabled":
