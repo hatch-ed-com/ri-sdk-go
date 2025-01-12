@@ -60,17 +60,17 @@ type GetConnectFilesOutput struct {
 // only the metadata as shown in the GetConnectFilesOutput
 //
 //meta:operation GET /admin/connect/files/{path}
-func (c *Client) GetConnectFiles(getConnectFilesInput GetConnectFilesInput) (*GetConnectFilesOutput, error) {
+func (c *Client) GetConnectFiles(params GetConnectFilesInput) (*GetConnectFilesOutput, error) {
 	var output GetConnectFilesOutput
 
-	url := fmt.Sprintf("%s/admin/connect/files/%s?project=%s", c.baseEndpoint, getConnectFilesInput.Path, getConnectFilesInput.Project)
+	url := fmt.Sprintf("%s/admin/connect/files/%s?project=%s", c.baseEndpoint, params.Path, params.Project)
 	req, err := c.GenerateRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if getConnectFilesInput.ResponseType != "" {
-		req.Header.Set("Accept", getConnectFilesInput.ResponseType)
+	if params.ResponseType != "" {
+		req.Header.Set("Accept", params.ResponseType)
 	}
 
 	res, err := c.httpClient.Do(req)

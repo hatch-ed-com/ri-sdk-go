@@ -196,10 +196,10 @@ type ProfileAttribute struct {
 // delegations and profiles that the invoking session has access.
 //
 //meta:operation GET /profiles/aggregated/for/{userId}
-func (c *Client) GetDelegationsForUser(input GetDelegationsForUserInput) (*GetDelegationsForUserOutput, error) {
+func (c *Client) GetDelegationsForUser(params GetDelegationsForUserInput) (*GetDelegationsForUserOutput, error) {
 	var output GetDelegationsForUserOutput
 
-	url := fmt.Sprintf("%s/profiles/aggregated/for/%s", c.baseEndpoint, input.UserId)
+	url := fmt.Sprintf("%s/profiles/aggregated/for/%s", c.baseEndpoint, params.UserId)
 	req, err := c.GenerateRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
