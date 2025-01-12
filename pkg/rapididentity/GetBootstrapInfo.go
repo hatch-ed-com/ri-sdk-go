@@ -565,6 +565,8 @@ type ShieldIdInfo struct {
 }
 
 // Retrieves RapidIdentity tenant and user access information for the invoking user.
+//
+//meta:operation GET /bootstrapInfo
 func (c *Client) GetBootstrapInfo() (*GetBootstrapInfoOutput, error) {
 	var output GetBootstrapInfoOutput
 
