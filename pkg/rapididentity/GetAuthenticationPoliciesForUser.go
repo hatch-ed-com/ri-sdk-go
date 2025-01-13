@@ -6,42 +6,91 @@ import (
 	"fmt"
 )
 
+// Params for GetAuthenticationPoliciesForUser method.
 type GetAuthenticationPoliciesForUserInput struct {
-	ShowAuthenticationPolicies       bool
-	ShowClaims                       bool
+	// Whether to provide authentication policies in response.
+	// If this is fault, user information is shown only.
+	ShowAuthenticationPolicies bool
+
+	// Whether to provide a claim for the user
+	// in the form of a json web token (jwt).
+	ShowClaims bool
+
+	// The fields to show in the authenticationPolicies
+	// response. By default all fields are shown.
 	AuthenticationPolicyFieldsToShow []string
-	User                             GetAuthenticationPoliciesForUserPayload
+
+	// The user to get authentication policies.
+	User GetAuthenticationPoliciesForUserPayload
 }
 
+// Request payload for retrieving authentication policies
+// for a user.
 type GetAuthenticationPoliciesForUserPayload struct {
+	// Username of the user. This can be any value within
+	// the idautoPersonUsernameMV attribute within RapidIdentity.
 	Username string `json:"username"`
 }
 
+// Output for the GetAuthenticationPoliciesForUser method.
 type GetAuthenticationPoliciesForUserOutput struct {
-	User                   User                   `json:"user"`
+	// User information for the username provided in the request.
+	User User `json:"user"`
+
+	// Authentication policies for the username provided in the request.
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
 }
 
+// RapidIdentity authentication policy information.
 type AuthenticationPolicy struct {
-	Id                    string                         `json:"id"`
-	Version               int                            `json:"version"`
-	Name                  string                         `json:"name"`
-	Enabled               bool                           `json:"enabled"`
-	Criteria              []AuthenticationPolicyCriteria `json:"criteria"`
-	Methods               []AuthenticationPolicyMethod   `json:"methods"`
-	InsecureQRIdEnabled   bool                           `json:"insecureQRIdEnabled"`
-	AlwaysFail            bool                           `json:"alwaysFail"`
-	IsResetPasswordPolicy bool                           `json:"isResetPasswordPolicy"`
+	// Unique id for the authentication policy.
+	Id string `json:"id"`
+
+	// The version of the authentication policy.
+	Version int `json:"version"`
+
+	// The name of the authentication policy.
+	Name string `json:"name"`
+
+	// Whether the authentication policy is enabled.
+	Enabled bool `json:"enabled"`
+
+	// The criteria for the authentication policy.
+	// This utilize an interface as the criteria array
+	// returns several different objects. Due to this
+	// several Criteria structs were created such as
+	// DaysOfTheWeekCriteria that implement the interface.
+	Criteria []AuthenticationPolicyCriteria `json:"criteria"`
+
+	// The methods for the authentication policy.
+	// This utilize an interface as the methods array
+	// returns several different objects. Due to this
+	// several Method structs were created such as
+	// DuoMethod that implement the interface.
+	Methods []AuthenticationPolicyMethod `json:"methods"`
+
+	// Whether the authentication policy can be initated with a QR Code.
+	InsecureQRIdEnabled bool `json:"insecureQRIdEnabled"`
+
+	// Whether the authentication policy should always fail.
+	AlwaysFail bool `json:"alwaysFail"`
+
+	// Whether the authentication policy is a forgot password policy.
+	IsResetPasswordPolicy bool `json:"isResetPasswordPolicy"`
 }
 
+// Interface for all policy criteria to implement.
 type AuthenticationPolicyCriteria interface {
 	GetBaseAuthenticationCriteriaInfo() BaseAuthenticationInfo
 }
 
+// Interface for all policy methods to implement.
 type AuthenticationPolicyMethod interface {
 	GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo
 }
 
+// Custom UnmarshJSON method due to Criteria and Methods fields on
+// GetAuthenticationPoliciesForUserOutput.
 func (ap *AuthenticationPolicy) UnmarshalJSON(b []byte) error {
 	var AuthenticationBaseData map[string]interface{}
 	err := json.Unmarshal(b, &AuthenticationBaseData)
@@ -268,28 +317,52 @@ func (ap *AuthenticationPolicy) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// Base fields for policy methods and criteria.
 type BaseAuthenticationInfo struct {
-	Type    string `json:"type"`
-	Enabled bool   `json:"enabled"`
+	// The type of method or criteria.
+	Type string `json:"type"`
+
+	// Whether the method or criteria is enabled.
+	Enabled bool `json:"enabled"`
 }
 
+// Determines if authentication policy is satisfied based on
+// the day of the week
 type DaysOfWeekCriteria struct {
 	BaseAuthenticationInfo
-	Sunday    bool `json:"sunday"`
-	Monday    bool `json:"monday"`
-	Tuesday   bool `json:"tuesday"`
+	// Authentication policy is enabled on Sundays
+	Sunday bool `json:"sunday"`
+
+	// Authentication policy is enabled on Mondays
+	Monday bool `json:"monday"`
+
+	// Authentication policy is enabled on Tuesdays
+	Tuesday bool `json:"tuesday"`
+
+	// Authentication policy is enabled on Wednesdays
 	Wednesday bool `json:"wednesday"`
-	Thursday  bool `json:"thursday"`
-	Friday    bool `json:"friday"`
-	Saturday  bool `json:"saturday"`
+
+	// Authentication policy is enabled on Thursdays
+	Thursday bool `json:"thursday"`
+
+	// Authentication policy is enabled on Fridays
+	Friday bool `json:"friday"`
+
+	// Authentication policy is enabled on Saturdays
+	Saturday bool `json:"saturday"`
 }
 
 func (dwc DaysOfWeekCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticationInfo {
 	return dwc.BaseAuthenticationInfo
 }
 
+// Determines if authentication policy is satisfied based on
+// WebAuthn devices registered.
 type WebAuthnCriteria struct {
 	BaseAuthenticationInfo
+	// If Negate is set to true then any user with
+	// WebAuthn devices registered will not satisfy the
+	// authentication policy
 	Negate bool `json:"negate"`
 }
 
@@ -297,6 +370,8 @@ func (wac WebAuthnCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticati
 	return wac.BaseAuthenticationInfo
 }
 
+// Determines if authentication policy is satisfied based on
+// a kerberos token being present.
 type KerberosCriteria struct {
 	BaseAuthenticationInfo
 }
@@ -305,16 +380,22 @@ func (kc KerberosCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticatio
 	return kc.BaseAuthenticationInfo
 }
 
+// Determines if authentication policy is satisfied based on
+// LDAP filter provided.
 type LdapFilterCriteria struct {
 	BaseAuthenticationInfo
-	LdapFilter        string `json:"ldapFilter"`
-	MatchNonLdapAdmin bool   `json:"matchNonLdapAdmin"`
+	// The LDAP filter to determine what users apply to policy.
+	LdapFilter string `json:"ldapFilter"`
+
+	// Whether to match the LDAP Admin account.
+	MatchNonLdapAdmin bool `json:"matchNonLdapAdmin"`
 }
 
 func (lfc LdapFilterCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticationInfo {
 	return lfc.BaseAuthenticationInfo
 }
 
+// Allows for QR Code to initiate authentication policy.
 type QrCodeCriteria struct {
 	BaseAuthenticationInfo
 }
@@ -323,37 +404,65 @@ func (qcc QrCodeCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthentication
 	return qcc.BaseAuthenticationInfo
 }
 
+// Determines if authentication policy is satisfied based on
+// Source IP Address.
 type SourceNetworkCriteria struct {
 	BaseAuthenticationInfo
-	Subnets                    []string `json:"subnets"`
-	EnableHttpHeaderProcessing bool     `json:"enableHttpHeaderProcessing"`
-	Negate                     bool     `json:"negate"`
+	// List of subnets to evaluate.
+	Subnets []string `json:"subnets"`
+
+	// Allow for insecure http.
+	EnableHttpHeaderProcessing bool `json:"enableHttpHeaderProcessing"`
+
+	// Whether to allow or deny the subnets listed.
+	Negate bool `json:"negate"`
 }
 
 func (snc SourceNetworkCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticationInfo {
 	return snc.BaseAuthenticationInfo
 }
 
+// Determines if authentication policy is satisfied based on
+// user being within certain roles.
 type RoleCriteria struct {
 	BaseAuthenticationInfo
-	Roles           []RoleAuthValue `json:"roles"`
-	ApplyToEveryone bool            `json:"applyToEveryone"`
-	InverseMatch    bool            `json:"inverseMatch"`
+
+	// List of roles to evaluate.
+	Roles []RoleAuthValue `json:"roles"`
+
+	// Whether to apply policy to everyone.
+	ApplyToEveryone bool `json:"applyToEveryone"`
+
+	// Whether to allow or deny users in the roles associated with
+	// this policy
+	InverseMatch bool `json:"inverseMatch"`
 }
 
 func (rc RoleCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticationInfo {
 	return rc.BaseAuthenticationInfo
 }
 
+// Role information for RoleCriteria.
 type RoleAuthValue struct {
-	Id   string `json:"id"`
+	// The idautoID of the role in RapidIdentity.
+	Id string `json:"id"`
+
+	// The name of the role in RapidIdentity.
 	Name string `json:"name"`
 }
 
+// Determines whether authentication policy is satisfied
+// based on the time of the day.
 type TimeOfDayCriteria struct {
 	BaseAuthenticationInfo
-	Start    TimeOfDayCriteriaSyntax
-	End      TimeOfDayCriteriaSyntax
+
+	// The start time to evaluate.
+	Start TimeOfDayCriteriaSyntax
+
+	// The end time to evaluate.
+	End TimeOfDayCriteriaSyntax
+
+	// The time zone to evaluate.
 	TimeZone string
 }
 
@@ -361,21 +470,31 @@ func (tdc TimeOfDayCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthenticat
 	return tdc.BaseAuthenticationInfo
 }
 
+// Time of day value for the TimeOfDayCriteria.
 type TimeOfDayCriteriaSyntax struct {
-	Hour   int `json:"hour"`
+	// Hour from 0 - 23.
+	Hour int `json:"hour"`
+
+	// Minute from 0 - 60.
 	Minute int `json:"minute"`
 }
 
+// Use DUO push or one time code to authenticate.
 type DuoMethod struct {
 	BaseAuthenticationInfo
-	ConfigId    string `json:"configId"`
-	AutoProcess bool   `json:"autoProcess"`
+
+	// The configuration ID for the Duo Configuration.
+	ConfigId string `json:"configId"`
+
+	// Removes additional click to enter DUO prompt.
+	AutoProcess bool `json:"autoProcess"`
 }
 
 func (dm DuoMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return dm.BaseAuthenticationInfo
 }
 
+// Recieve a one time code to email to authenticate.
 type EmailMethod struct {
 	BaseAuthenticationInfo
 }
@@ -384,27 +503,49 @@ func (em EmailMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return em.BaseAuthenticationInfo
 }
 
+// Utilized SAML to extenral IDP to authenticate.
 type FederationMethod struct {
 	BaseAuthenticationInfo
-	TrustedIdp                  FederationAuthValue `json:"trustedIdp"`
-	PostAuthRedirectUrl         string              `json:"postAuthRedirectUrl"`
-	ExposeAttributes            bool                `json:"exposeAttributes"`
-	ForwardUsernameEnabled      bool                `json:"forwardUsernameEnabled"`
-	ForwardUsernameAttribute    string              `json:"forwardUsernameAttribute"`
-	ForwardUsernameNameIDFormat string              `json:"forwardUsernameNameIDFormat"`
+
+	// The Trusted IDP configuration to reference
+	TrustedIdp FederationAuthValue `json:"trustedIdp"`
+
+	// The url to redirect to once authentication at trusted IDP
+	// has been completed.
+	PostAuthRedirectUrl string `json:"postAuthRedirectUrl"`
+
+	// Whether to expose atrributes in SAML response.
+	ExposeAttributes bool `json:"exposeAttributes"`
+
+	// Whether to forward the username to the IDP.
+	ForwardUsernameEnabled bool `json:"forwardUsernameEnabled"`
+
+	// The username attribute to forward to the IDP.
+	ForwardUsernameAttribute string `json:"forwardUsernameAttribute"`
+
+	// The SAML NAME ID Format of the forward attribute.
+	ForwardUsernameNameIDFormat string `json:"forwardUsernameNameIDFormat"`
 }
 
 func (fm FederationMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return fm.BaseAuthenticationInfo
 }
 
+// The federation values from the FederationMethod.
 type FederationAuthValue struct {
-	Id   string `json:"id"`
+
+	// The unique ID of the trusted IDP configuration.
+	Id string `json:"id"`
+
+	// THe name of the trusted IDP configuration.
 	Name string `json:"name"`
 }
 
+// Use FIDO, or device login to authenticate.
 type WebAuthnMethod struct {
 	BaseAuthenticationInfo
+
+	// Allow login to be remembered for 30 days.
 	AllowChallengeDeferral bool `json:"allowChallengeDeferral"`
 }
 
@@ -412,6 +553,7 @@ func (wam WebAuthnMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationIn
 	return wam.BaseAuthenticationInfo
 }
 
+// Authenticate with device login on Active Directory joined device.
 type KerberosMethod struct {
 	BaseAuthenticationInfo
 }
@@ -420,34 +562,60 @@ func (km KerberosMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInf
 	return km.BaseAuthenticationInfo
 }
 
+// Use password to authenticate.
 type PasswordMethod struct {
 	BaseAuthenticationInfo
+
+	// Whether to display expiration warning when password is close to expiring.
 	ExpirationWarningEnabled bool `json:"expirationWarningEnabled"`
-	ExpirationWarningDays    int  `json:"expirationWarningDays"`
-	CurrentPasswordAgeDays   int  `json:"currentPasswordAgeDays"`
-	PasswordMaximumAgeDays   int  `json:"passwordMaximumAgeDays"`
-	MustChange               bool `json:"mustChange"`
+
+	// How many days prior to password expiration to show expiration warning.
+	ExpirationWarningDays int `json:"expirationWarningDays"`
+
+	// How long since the password has been changed.
+	CurrentPasswordAgeDays int `json:"currentPasswordAgeDays"`
+
+	// The maximum number of days a password can be used before it must be changed.
+	PasswordMaximumAgeDays int `json:"passwordMaximumAgeDays"`
+
+	// Whether the user must change their password on login.
+	MustChange bool `json:"mustChange"`
 }
 
 func (pm PasswordMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return pm.BaseAuthenticationInfo
 }
 
+// Utilize a pool of images to authenticate.
 type PictographMethod struct {
 	BaseAuthenticationInfo
-	NumToChallenge      int      `json:"numToChallenge"`
-	NumToChoose         int      `json:"numToChoose"`
-	UseDefaultImagePool bool     `json:"useDefaultImagePool"`
-	ImageIds            []string `json:"imageIds"`
+
+	// Number of images to display to user to choose from.
+	NumToChallenge int `json:"numToChallenge"`
+
+	// The number of images a user must select to authenticate.
+	NumToChoose int `json:"numToChoose"`
+
+	// Whether to use the default pool of images or custom images.
+	UseDefaultImagePool bool `json:"useDefaultImagePool"`
+
+	// The imageIds to use if custom image pool is used.
+	ImageIds []string `json:"imageIds"`
 }
 
 func (pm PictographMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return pm.BaseAuthenticationInfo
 }
 
+// Utilize the RapidIdentity Mobile app to authenticate.
+// via push or one time code.
 type PingMeMethod struct {
 	BaseAuthenticationInfo
-	NativePingMe       bool   `json:"nativePingMe"`
+
+	// Whether to use cloud based pingMe (Legacy).
+	NativePingMe bool `json:"nativePingMe"`
+
+	// A friendly description for the service.
 	ServiceDescription string `json:"serviceDescription"`
 }
 
@@ -455,8 +623,11 @@ func (pmm PingMeMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo
 	return pmm.BaseAuthenticationInfo
 }
 
+// Utilize challenge questions and answers to authenticate.
 type RapidPortalChallengeMethod struct {
 	BaseAuthenticationInfo
+
+	// The RapidIdentity Portal base URL.
 	RapidPortalBaseUrl string `json:"rapidPortalBaseUrl"`
 }
 
@@ -464,6 +635,7 @@ func (rpcm RapidPortalChallengeMethod) GetBaseAuthenticationMethodInfo() BaseAut
 	return rpcm.BaseAuthenticationInfo
 }
 
+// Utilize QR Code to authenticate.
 type QrCodeMethod struct {
 	BaseAuthenticationInfo
 }
@@ -472,6 +644,7 @@ func (qcm QrCodeMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo
 	return qcm.BaseAuthenticationInfo
 }
 
+// Utilize one time code sent to mobile number to authenticate.
 type SmsMethod struct {
 	BaseAuthenticationInfo
 }
@@ -480,9 +653,14 @@ func (sm SmsMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return sm.BaseAuthenticationInfo
 }
 
+// Utilize social network provider to authenticate.
 type SocialMethod struct {
 	BaseAuthenticationInfo
-	Apple      SocialProviderAppleInfo  `json:"apple"`
+
+	// Apple provider information.
+	Apple SocialProviderAppleInfo `json:"apple"`
+
+	// Google provider information.
 	GooglePlus SocialProviderGoogleInfo `json:"googlePlus"`
 }
 
@@ -490,32 +668,53 @@ func (sm SocialMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo 
 	return sm.BaseAuthenticationInfo
 }
 
+// Apple social provider information.
 type SocialProviderAppleInfo struct {
-	Enabled    bool   `json:"enabled"`
+	// Whether Apple is enabled to be used.
+	Enabled bool `json:"enabled"`
+
+	// The private key associated with the Apple social provider.
 	PrivateKey string `json:"privateKey"`
 }
 
 type SocialProviderGoogleInfo struct {
-	Enabled      bool   `json:"enabled"`
+	// Whether Google is enabled to be used
+	Enabled bool `json:"enabled"`
+
+	// The client secret associated with the Google social provider.
 	ClientSecret string `json:"clientSecret"`
 }
 
+// Authenticate with one time code to TOTP application.
 type TotpMethod struct {
 	BaseAuthenticationInfo
-	TotpWindowSize         int    `json:"totpWindowSize"`
-	AllowChallengeDeferral bool   `json:"allowChallengeDeferral"`
-	IssuerName             string `json:"issuerName"`
-	SetupInstructions      string `json:"setupInstructions"`
+
+	// The window size for the registration QR Code.
+	TotpWindowSize int `json:"totpWindowSize"`
+
+	// Only challenge user with one time code every 30 days.
+	AllowChallengeDeferral bool `json:"allowChallengeDeferral"`
+
+	// The issuer name for the TOTP code.
+	IssuerName string `json:"issuerName"`
+
+	// The setup instructions to display during registration.
+	SetupInstructions string `json:"setupInstructions"`
 }
 
 func (tm TotpMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
 	return tm.BaseAuthenticationInfo
 }
 
+// User agreement to display on login.
 type UserAgreementMethod struct {
 	BaseAuthenticationInfo
-	UserAgreementId            string `json:"userAgreementId"`
-	ShowuserAgreementEveryTime bool   `json:"showuserAgreementEveryTime"`
+
+	// The unique id that references the User Agreement.
+	UserAgreementId string `json:"userAgreementId"`
+
+	// Whether to show user agreement on every login or just one time.
+	ShowuserAgreementEveryTime bool `json:"showuserAgreementEveryTime"`
 }
 
 func (uam UserAgreementMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {
