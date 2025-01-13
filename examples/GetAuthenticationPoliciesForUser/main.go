@@ -48,5 +48,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", output)
+	for _, method := range output.AuthenticationPolicies[0].Methods {
+		if method.GetBaseAuthenticationMethodInfo().Type == "webAuthn" {
+			webAuthn := method.(rapididentity.WebAuthnMethod)
+			fmt.Printf("Allow Change Deferral: %t", webAuthn.AllowChallengeDeferral)
+		}
+	}
 }
