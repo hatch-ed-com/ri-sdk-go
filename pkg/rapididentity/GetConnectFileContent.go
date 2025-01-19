@@ -1,6 +1,9 @@
 package rapididentity
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // BUG(Identity Automation): Downloading a compressed file is not possible with GetConnectFileContent. If compression is needed use GetConnectFileContentZip
 
@@ -32,9 +35,9 @@ type GetConnectFileContentInput struct {
 // module and logs.
 //
 //meta:operation GET /admin/connect/fileContent/{path}
-func (c *Client) GetConnectFileContent(params GetConnectFileContentInput) ([]byte, error) {
+func (c *Client) GetConnectFileContent(ctx context.Context, params GetConnectFileContentInput) ([]byte, error) {
 	url := fmt.Sprintf("%s/admin/connect/fileContent/%s?project=%s&decompress=%t", c.baseEndpoint, params.Path, params.Project, params.Decompress)
-	req, err := c.GenerateRequest("GET", url, nil)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

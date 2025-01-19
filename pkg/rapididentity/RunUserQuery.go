@@ -3,6 +3,7 @@ package rapididentity
 import (
 	"bytes"
 	"cmp"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -28,7 +29,7 @@ type RunUserQueryInput struct {
 // Run a user query.
 //
 //meta:operation POST /users
-func (c *Client) RunUserQuery(params RunUserQueryInput) ([]User, error) {
+func (c *Client) RunUserQuery(ctx context.Context, params RunUserQueryInput) ([]User, error) {
 	var output []User
 	limit := cmp.Or(params.Limit, 1000)
 	searchType := cmp.Or(params.SearchType, "advanced")
@@ -42,7 +43,7 @@ func (c *Client) RunUserQuery(params RunUserQueryInput) ([]User, error) {
 		url = fmt.Sprintf("%s&did=%s", url, field)
 	}
 	requestBody := bytes.NewBuffer(query)
-	req, err := c.GenerateRequest("POST", url, requestBody)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
 	if err != nil {
 		return nil, err
 	}

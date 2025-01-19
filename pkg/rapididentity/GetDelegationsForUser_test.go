@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -32,7 +33,8 @@ func TestGetDelegationsForUser(t *testing.T) {
 	input := GetDelegationsForUserInput{
 		UserId: "1234",
 	}
-	output, err := client.GetDelegationsForUser(input)
+	ctx := context.Background()
+	output, err := client.GetDelegationsForUser(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

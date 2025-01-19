@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -70,7 +71,8 @@ func TestRunAuditReport(t *testing.T) {
 		},
 	}
 
-	output, err := client.RunAuditReport(input)
+	ctx := context.Background()
+	output, err := client.RunAuditReport(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

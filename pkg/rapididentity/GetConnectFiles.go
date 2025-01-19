@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -60,11 +61,11 @@ type GetConnectFilesOutput struct {
 // only the metadata as shown in the GetConnectFilesOutput
 //
 //meta:operation GET /admin/connect/files/{path}
-func (c *Client) GetConnectFiles(params GetConnectFilesInput) (*GetConnectFilesOutput, error) {
+func (c *Client) GetConnectFiles(ctx context.Context, params GetConnectFilesInput) (*GetConnectFilesOutput, error) {
 	var output GetConnectFilesOutput
 
 	url := fmt.Sprintf("%s/admin/connect/files/%s?project=%s", c.baseEndpoint, params.Path, params.Project)
-	req, err := c.GenerateRequest("GET", url, nil)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

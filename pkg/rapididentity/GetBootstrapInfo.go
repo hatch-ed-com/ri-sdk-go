@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -567,11 +568,11 @@ type ShieldIdInfo struct {
 // Retrieves RapidIdentity tenant and user access information for the invoking user.
 //
 //meta:operation GET /bootstrapInfo
-func (c *Client) GetBootstrapInfo() (*GetBootstrapInfoOutput, error) {
+func (c *Client) GetBootstrapInfo(ctx context.Context) (*GetBootstrapInfoOutput, error) {
 	var output GetBootstrapInfoOutput
 
 	url := fmt.Sprintf("%s/bootstrapInfo", c.baseEndpoint)
-	req, err := c.GenerateRequest("GET", url, nil)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

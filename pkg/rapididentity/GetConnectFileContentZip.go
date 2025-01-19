@@ -1,6 +1,9 @@
 package rapididentity
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // Input for retrieving multiple files zipped from the
 // Connect files module and logs
@@ -20,12 +23,12 @@ type GetConnectFileContentZipInput struct {
 // module and logs.
 //
 //meta:operation GET /admin/connect/fileContentZip
-func (c *Client) GetConnectFileContentZip(params GetConnectFileContentZipInput) ([]byte, error) {
+func (c *Client) GetConnectFileContentZip(ctx context.Context, params GetConnectFileContentZipInput) ([]byte, error) {
 	url := fmt.Sprintf("%s/admin/connect/fileContentZip?project=%s", c.baseEndpoint, params.Project)
 	for _, path := range params.PathList {
 		url = fmt.Sprintf("%s&path=%s", url, path)
 	}
-	req, err := c.GenerateRequest("GET", url, nil)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

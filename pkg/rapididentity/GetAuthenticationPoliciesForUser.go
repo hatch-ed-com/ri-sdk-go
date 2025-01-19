@@ -2,6 +2,7 @@ package rapididentity
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -724,7 +725,7 @@ func (uam UserAgreementMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticat
 // Retrieves authentication policies for specified user.
 //
 //meta:operation POST /authn/v1/username
-func (c *Client) GetAuthenticationPoliciesForUser(params GetAuthenticationPoliciesForUserInput) (*GetAuthenticationPoliciesForUserOutput, error) {
+func (c *Client) GetAuthenticationPoliciesForUser(ctx context.Context, params GetAuthenticationPoliciesForUserInput) (*GetAuthenticationPoliciesForUserOutput, error) {
 	url := fmt.Sprintf("%s/authn/v1/username?authenticationPolicies=%t&claim=%t", c.baseEndpoint, params.ShowAuthenticationPolicies, params.ShowClaims)
 	for _, field := range params.AuthenticationPolicyFieldsToShow {
 		url = fmt.Sprintf("%s&authenticationPolicyField=%s", url, field)
@@ -734,7 +735,7 @@ func (c *Client) GetAuthenticationPoliciesForUser(params GetAuthenticationPolici
 		return nil, err
 	}
 	requestBody := bytes.NewBuffer(user)
-	req, err := c.GenerateRequest("POST", url, requestBody)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
 	if err != nil {
 		return nil, err
 	}

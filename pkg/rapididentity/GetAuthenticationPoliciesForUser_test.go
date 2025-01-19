@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -49,7 +50,8 @@ func TestGetAuthenticationPoliciesForUser(t *testing.T) {
 			Username: "user@example.com",
 		},
 	}
-	output, err := client.GetAuthenticationPoliciesForUser(input)
+	ctx := context.Background()
+	output, err := client.GetAuthenticationPoliciesForUser(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

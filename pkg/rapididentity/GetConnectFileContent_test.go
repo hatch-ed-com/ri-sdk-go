@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -31,7 +32,8 @@ func TestGetConnectFileContent(t *testing.T) {
 		Decompress:   true,
 		ResponseType: "text/plain",
 	}
-	output, err := client.GetConnectFileContent(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFileContent(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

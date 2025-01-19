@@ -127,6 +127,7 @@ package rapididentity
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -248,8 +249,8 @@ type Client struct {
 
 // Generates a base RapidIdentity API request that
 // includes authorization and other reused headers.
-func (c *Client) GenerateRequest(method string, url string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, body)
+func (c *Client) GenerateRequest(ctx context.Context, method string, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, err
 	}
