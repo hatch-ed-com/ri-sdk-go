@@ -1,6 +1,6 @@
 // # The RapidIdentity SDK for the go programming language
 //
-// ## Getting Started
+// # Getting Started
 //
 // To get started working with the SDK setup your project for Go modules, and retrieve the SDK dependencies with go
 // get. Be sure to create your Service Identity Key with the appropriate permissions.
@@ -9,7 +9,7 @@
 //
 //	go get github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity
 //
-// ## Hello RapidIdentity
+// # Hello RapidIdentity
 //
 //	package main
 //
@@ -35,6 +35,7 @@
 //			}
 //			log.Fatal(err)
 //		}
+//		defer client.Close()
 //
 //		input := rapididentity.GetConnectFilesInput{
 //			Path:    "/",
