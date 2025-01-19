@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -50,7 +51,8 @@ func main() {
 		},
 	}
 
-	output, err := client.RunUserQuery(input)
+	ctx := context.Background()
+	output, err := client.RunUserQuery(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {

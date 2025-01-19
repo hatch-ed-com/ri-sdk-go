@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -39,7 +40,8 @@ func main() {
 		},
 	}
 
-	output, err := client.GetAuthenticationPoliciesForUser(input)
+	ctx := context.Background()
+	output, err := client.GetAuthenticationPoliciesForUser(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {

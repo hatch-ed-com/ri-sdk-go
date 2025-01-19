@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -23,7 +24,8 @@ func TestGetConnectFileContentZip(t *testing.T) {
 		PathList: []string{"/hello/world.txt", "/foo/bar.txt"},
 		Project:  "sec_mgr",
 	}
-	output, err := client.GetConnectFileContentZip(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFileContentZip(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

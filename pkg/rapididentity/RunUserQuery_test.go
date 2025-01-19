@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -50,7 +51,8 @@ func TestRunUserQuery(t *testing.T) {
 		},
 	}
 
-	output, err := client.RunUserQuery(input)
+	ctx := context.Background()
+	output, err := client.RunUserQuery(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

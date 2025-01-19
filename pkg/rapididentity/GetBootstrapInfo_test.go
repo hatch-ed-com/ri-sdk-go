@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -20,8 +21,9 @@ func TestGetBootstrapInfo(t *testing.T) {
 			}`,
 		)
 	})
+	ctx := context.Background()
 
-	output, err := client.GetBootstrapInfo()
+	output, err := client.GetBootstrapInfo(ctx)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}

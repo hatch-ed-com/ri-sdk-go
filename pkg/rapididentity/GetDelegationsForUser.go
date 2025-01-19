@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -196,11 +197,11 @@ type ProfileAttribute struct {
 // delegations and profiles that the invoking session has access.
 //
 //meta:operation GET /profiles/aggregated/for/{userId}
-func (c *Client) GetDelegationsForUser(params GetDelegationsForUserInput) (*GetDelegationsForUserOutput, error) {
+func (c *Client) GetDelegationsForUser(ctx context.Context, params GetDelegationsForUserInput) (*GetDelegationsForUserOutput, error) {
 	var output GetDelegationsForUserOutput
 
 	url := fmt.Sprintf("%s/profiles/aggregated/for/%s", c.baseEndpoint, params.UserId)
-	req, err := c.GenerateRequest("GET", url, nil)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

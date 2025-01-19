@@ -2,6 +2,7 @@ package rapididentity
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -196,14 +197,14 @@ type AuditReportExtendedProperties struct {
 // Runs an audit report query.
 //
 //meta:operation POST /reporting/auditQuery
-func (c *Client) RunAuditReport(params RunAuditReportInput) (*RunAuditReportOutput, error) {
+func (c *Client) RunAuditReport(ctx context.Context, params RunAuditReportInput) (*RunAuditReportOutput, error) {
 	url := fmt.Sprintf("%s/reporting/auditQuery", c.baseEndpoint)
 	query, err := json.Marshal(params.Query)
 	if err != nil {
 		return nil, err
 	}
 	requestBody := bytes.NewBuffer(query)
-	req, err := c.GenerateRequest("POST", url, requestBody)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
 	if err != nil {
 		return nil, err
 	}

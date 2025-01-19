@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -32,7 +33,8 @@ func TestGetConnectFiles(t *testing.T) {
 		Path:    "log/jobs",
 		Project: "sec_mgr",
 	}
-	output, err := client.GetConnectFiles(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFiles(ctx, input)
 	if err != nil {
 		t.Errorf("got error %s, want none", err)
 	}
