@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,7 +32,8 @@ func main() {
 	}
 	defer client.Close()
 
-	output, err := client.GetBootstrapInfo()
+	ctx := context.Background()
+	output, err := client.GetBootstrapInfo(ctx)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {

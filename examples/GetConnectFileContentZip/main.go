@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"net/url"
@@ -39,7 +40,8 @@ func main() {
 		Project: "sec_mgr",
 	}
 
-	output, err := client.GetConnectFileContentZip(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFileContentZip(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {

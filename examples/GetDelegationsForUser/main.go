@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -43,7 +44,8 @@ func main() {
 		UserId: "08b5f0ec-d56a-4712-ada5-c86074ab11db",
 	}
 
-	output, err := client.GetDelegationsForUser(input)
+	ctx := context.Background()
+	output, err := client.GetDelegationsForUser(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {

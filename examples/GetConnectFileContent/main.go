@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -38,7 +39,8 @@ func main() {
 		ResponseType: "text/html",
 	}
 
-	output, err := client.GetConnectFileContent(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFileContent(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {
