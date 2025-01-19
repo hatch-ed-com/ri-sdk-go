@@ -1,5 +1,128 @@
-// Package rapididentity provides an easy to use SDK
-// for the Identity Automation RapidIdentity REST API
+// # Getting Started
+//
+// To get started working with the RapidIdentity package setup your project for Go modules, and retrieve the package dependencies with go
+// get. Be sure to create your Service Identity Key with the appropriate permissions.
+// This example shows how you can use the RapidIdentity package to make an API request using the
+// RapidIdentity client.
+//
+//	go get github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity
+//
+// # Service Identity Example
+//
+// The below example shows how to retrieve RapidIdentity Connect files metadata
+// using a Service Identity Key.
+//
+//	package main
+//
+//	import (
+//		"fmt"
+//		"net/http"
+//
+//		"github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity"
+//	)
+//
+//	func main() {
+//		options := rapididentity.Options{
+//			HTTPClient:      &http.Client{},
+//			BaseUrl:         "https://portal.us001-rapididentity.com",
+//			ServiceIdentity: "service_identity_key",
+//		}
+//
+//		client, err := rapididentity.New(options)
+//		if err != nil {
+//			riError, ok := err.(rapididentity.RapidIdentityError)
+//			if ok {
+//				log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+//			}
+//			log.Fatal(err)
+//		}
+//		defer client.Close()
+//
+//		input := rapididentity.GetConnectFilesInput{
+//			Path:    "/",
+//			Project: "sec_mgr",
+//		}
+//
+//		output, err := client.GetConnectFiles(input)
+//		if err != nil {
+//			riError, ok := err.(rapididentity.RapidIdentityError)
+//			if ok {
+//				log.Fatalf("Request URL: %s, Status Code: %d, Message: %s", riError.ReqUrl, riError.Code, riError.Message)
+//			}
+//			log.Fatal(err)
+//		}
+//
+//		fmt.Printf("%+v\n", output)
+//	}
+//
+// # User Session Example
+//
+// There are some methods that require a user session rather than a service identity
+// to retrieve data back from the API. In these circumstances you can create a new
+// RapidIdentity client using user credentials. When using user credentials be sure
+// to close the client session.
+//
+//	package main
+//
+//	import (
+//		"fmt"
+//		"log"
+//		"net/http"
+//		"net/url"
+//		"os"
+//
+//		"github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity"
+//	)
+//
+//	func main() {
+//		baseUrl, err := url.Parse(os.Getenv("RI_URL"))
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//		options := rapididentity.Options{
+//			HTTPClient: &http.Client{},
+//			BaseUrl:    baseUrl,
+//			RapidIdentityUser: &rapididentity.RapidIdentityUser{
+//				Username: os.Getenv("RI_USER"),
+//				Password: os.Getenv("RI_PWD"),
+//			},
+//		}
+//
+//		client, err := rapididentity.New(options)
+//		if err != nil {
+//			riError, ok := err.(rapididentity.RapidIdentityError)
+//			if ok {
+//				log.Fatalf("Method: %s, Request URL: %s, Status Code: %d, Message: %s, Reason: %s",
+//					riError.Method,
+//					riError.ReqUrl,
+//					riError.Code,
+//					riError.Message,
+//					riError.Reason)
+//			}
+//			log.Fatal(err)
+//		}
+//		defer client.Close()
+//
+//		input := rapididentity.GetDelegationsForUserInput{
+//			UserId: "08b5f0ec-d56a-4712-ada5-c86074ab11db",
+//		}
+//
+//		output, err := client.GetDelegationsForUser(input)
+//		if err != nil {
+//			riError, ok := err.(rapididentity.RapidIdentityError)
+//			if ok {
+//				log.Fatalf("Method: %s, Request URL: %s, Status Code: %d, Message: %s, Reason: %s",
+//					riError.Method,
+//					riError.ReqUrl,
+//					riError.Code,
+//					riError.Message,
+//					riError.Reason)
+//			}
+//			log.Fatal(err)
+//		}
+//
+//		fmt.Printf("%+v\n", output)
+//	}
 package rapididentity
 
 import (

@@ -1,5 +1,8 @@
 # RapidIdentity GO SDK
 
+[![ri-sdk-go release (latest SemVer)](https://img.shields.io/github/v/release/hatch-ed-com/ri-sdk-go?sort=semver)](https://github.com/hatch-ed-com/ri-sdk-go/releases)
+[![Go Reference](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity)
+
 The RapidIdentity SDK for the go programming language
 
 ## Getting Started
@@ -54,6 +57,7 @@ func main() {
 		}
 		log.Fatal(err)
 	}
+	defer client.Close()
 
 	input := rapididentity.GetConnectFilesInput{
 		Path:    "/",
