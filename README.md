@@ -36,6 +36,7 @@ In your preferred editor add the following content to `main.go`
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -64,7 +65,8 @@ func main() {
 		Project: "sec_mgr",
 	}
 
-	output, err := client.GetConnectFiles(input)
+	ctx := context.Background()
+	output, err := client.GetConnectFiles(ctx, input)
 	if err != nil {
 		riError, ok := err.(rapididentity.RapidIdentityError)
 		if ok {
