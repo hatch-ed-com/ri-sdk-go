@@ -16,6 +16,8 @@ type SearchConnectActionSetsInput struct {
 
 	// The Connect project to search within.
 	// If empty, all projects will be searched.
+	// For identifying the <Main> project use the
+	// const variable MainProject.
 	Project string `json:"project"`
 
 	// Whether to match action set names.
