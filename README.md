@@ -2,6 +2,7 @@
 
 [![ri-sdk-go release (latest SemVer)](https://img.shields.io/github/v/release/hatch-ed-com/ri-sdk-go?sort=semver)](https://github.com/hatch-ed-com/ri-sdk-go/releases)
 [![Go Reference](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/hatch-ed-com/ri-sdk-go/pkg/rapididentity)
+[![Test Status](https://github.com/hatch-ed-com/ri-sdk-go/workflows/tests/badge.svg)](https://github.com/hatch-ed-com/ri-sdk-go/actions?query=workflow%3Atests)
 
 The RapidIdentity SDK for the go programming language
 
