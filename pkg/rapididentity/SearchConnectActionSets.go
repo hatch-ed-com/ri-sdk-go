@@ -159,7 +159,11 @@ func (c *Client) SearchConnectActionSets(ctx context.Context, params SearchConne
 
 	url := fmt.Sprintf("%s/admin/connect/search/actions?searchString=%s&matchAction=%t&matchCase=%t&regex=%t", c.baseEndpoint, params.SearchString, params.MatchAction, params.MatchCase, params.Regex)
 	if params.Project != "" {
-		url = fmt.Sprintf("%s&project=%s", url, params.Project)
+		if params.Project == MainProject {
+			url = fmt.Sprintf("%s&project=", url)
+		} else {
+			url = fmt.Sprintf("%s&project=%s", url, params.Project)
+		}
 	}
 	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
