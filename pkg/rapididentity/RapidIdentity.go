@@ -142,6 +142,7 @@ import (
 
 const (
 	Version          = "v1.0.0"
+	MainProject      = "<Main>" // Represents the <Main> project. Some methods require this value vs an empty string for identifying the <Main> project
 	defaultUserAgent = "ri-sdk-go" + "/" + Version
 )
 
