@@ -10,7 +10,7 @@ import (
 func TestGetLdapAttributes(t *testing.T) {
 	t.Parallel()
 	client, mux := setup(t)
-	mux.HandleFunc(baseUrlPath+"/admin/ldap/schema/attribute", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(baseUrlPath+"/admin/ldap/schema/attributes", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
 
