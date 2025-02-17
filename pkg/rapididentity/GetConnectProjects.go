@@ -24,15 +24,15 @@ type ConnectProject struct {
 
 	// The group DN with administrator privileges
 	// for the project.
-	AdminGroupDN bool `json:"adminGroupDN"`
+	AdminGroupDN string `json:"adminGroupDN"`
 
 	// The group DN with operator privileges
 	// for the project.
-	OperatorGroupDN bool `json:"operatorGroupDN"`
+	OperatorGroupDN string `json:"operatorGroupDN"`
 
 	// The group DN with auditor privileges
 	// for the project.
-	AuditorGroupDN bool `json:"auditorGroupDN"`
+	AuditorGroupDN string `json:"auditorGroupDN"`
 
 	// The RESTPoint configuration for the project.
 	RestPoints RestPointConfig `json:"restPoints"`
