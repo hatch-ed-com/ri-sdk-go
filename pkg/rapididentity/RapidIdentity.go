@@ -343,6 +343,34 @@ func (c *Client) Close() error {
 	return nil
 }
 
+// DoCustomRequest allows users to make custom API calls
+// that may not be included in the client methods.
+// The path should be the endpoint path after /api/rest/
+// For example, to make a request to /api/rest/admin/workflow/resources
+// the path should be admin/workflow/resources
+//
+// When the body is present the Content-Type header is
+// set to application/json. Other Content-Types are not
+// currently supported.
+func (c *Client) DoCustomRequest(ctx context.Context, method string, path string, body io.Reader) (*http.Response, error) {
+	endpointUrl := fmt.Sprintf("%s/%s", c.baseEndpoint, path)
+	req, err := c.GenerateRequest(ctx, method, endpointUrl, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if body != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // Creates a new RapidIdentity Client
 // with the provided options
 func New(options Options) (*Client, error) {
