@@ -206,3 +206,219 @@ func TestDoCustomRequest(t *testing.T) {
 
 	t.Cleanup(server.Close)
 }
+
+func TestDoCustomRequestWithHeaders(t *testing.T) {
+	t.Parallel()
+
+	t.Run("custom content type with body", func(t *testing.T) {
+		t.Parallel()
+		mux := http.NewServeMux()
+		server := httptest.NewServer(mux)
+		mux.HandleFunc(baseUrlPath+"/connect/actionSets/execute", func(w http.ResponseWriter, r *http.Request) {
+			testMethod(t, r, "POST")
+			testHeader(t, r, "Content-Type", "text/plain")
+			reqBody, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintln(w, err)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, string(reqBody))
+		})
+
+		baseUrl, _ := url.Parse(server.URL)
+		client, _ := New(Options{
+			HTTPClient:      &http.Client{},
+			BaseUrl:         baseUrl,
+			ServiceIdentity: mockServiceIdentity,
+		})
+		defer func(client *Client) {
+			err := client.Close()
+			if err != nil {
+				t.Errorf("error closing client: %s", err)
+			}
+		}(client)
+
+		body := bytes.NewBufferString("plain text body")
+		headers := http.Header{}
+		headers.Set("Content-Type", "text/plain")
+
+		ctx := context.Background()
+		res, err := client.DoCustomRequestWithHeaders(ctx, "POST", "connect/actionSets/execute", headers, body)
+		if err != nil {
+			t.Errorf("error making custom request: %s", err)
+		}
+
+		defer func(res *http.Response) {
+			err := res.Body.Close()
+			if err != nil {
+				t.Errorf("error closing response body: %s", err)
+			}
+		}(res)
+
+		resBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("error reading response body: %s", err)
+		}
+
+		got := string(resBody)
+		want := "plain text body"
+
+		if got != want {
+			t.Errorf("response body: got %s, want %s", got, want)
+		}
+
+		t.Cleanup(server.Close)
+	})
+
+	t.Run("default content type with body", func(t *testing.T) {
+		t.Parallel()
+		mux := http.NewServeMux()
+		server := httptest.NewServer(mux)
+		mux.HandleFunc(baseUrlPath+"/util/regex/v2/validate", func(w http.ResponseWriter, r *http.Request) {
+			testMethod(t, r, "POST")
+			testHeader(t, r, "Content-Type", "application/json")
+			var regExp struct {
+				Value string `json:"value"`
+			}
+			reqBody, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintln(w, err)
+				return
+			}
+			err = json.Unmarshal(reqBody, &regExp)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintln(w, err)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w,
+				`{
+					"result": true,
+					"message": "%s"
+				}`,
+				regExp.Value)
+		})
+
+		baseUrl, _ := url.Parse(server.URL)
+		client, _ := New(Options{
+			HTTPClient:      &http.Client{},
+			BaseUrl:         baseUrl,
+			ServiceIdentity: mockServiceIdentity,
+		})
+		defer func(client *Client) {
+			err := client.Close()
+			if err != nil {
+				t.Errorf("error closing client: %s", err)
+			}
+		}(client)
+
+		input := struct {
+			Value string `json:"value"`
+		}{
+			Value: "a.+",
+		}
+
+		payload, err := json.Marshal(input)
+		if err != nil {
+			t.Errorf("error marshalling request body: %s", err)
+		}
+
+		payloadBuf := bytes.NewBuffer(payload)
+
+		ctx := context.Background()
+		res, err := client.DoCustomRequestWithHeaders(ctx, "POST", "util/regex/v2/validate", nil, payloadBuf)
+		if err != nil {
+			t.Errorf("error making custom request: %s", err)
+		}
+
+		defer func(res *http.Response) {
+			err := res.Body.Close()
+			if err != nil {
+				t.Errorf("error closing response body: %s", err)
+			}
+		}(res)
+
+		resBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("error reading response body: %s", err)
+		}
+
+		var endpointResponse struct {
+			Result  bool   `json:"result"`
+			Message string `json:"message"`
+		}
+
+		err = json.Unmarshal(resBody, &endpointResponse)
+		if err != nil {
+			t.Errorf("error unmarshalling response body: %s", err)
+		}
+
+		got := endpointResponse.Message
+		want := input.Value
+
+		if got != want {
+			t.Errorf("response message: got %s, want %s", got, want)
+		}
+
+		t.Cleanup(server.Close)
+	})
+
+	t.Run("custom accept header with no body", func(t *testing.T) {
+		t.Parallel()
+		mux := http.NewServeMux()
+		server := httptest.NewServer(mux)
+		mux.HandleFunc(baseUrlPath+"/admin/workflow/resources", func(w http.ResponseWriter, r *http.Request) {
+			testMethod(t, r, "GET")
+			testHeader(t, r, "Accept", "text/plain")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "plain text response")
+		})
+
+		baseUrl, _ := url.Parse(server.URL)
+		client, _ := New(Options{
+			HTTPClient:      &http.Client{},
+			BaseUrl:         baseUrl,
+			ServiceIdentity: mockServiceIdentity,
+		})
+		defer func(client *Client) {
+			err := client.Close()
+			if err != nil {
+				t.Errorf("error closing client: %s", err)
+			}
+		}(client)
+
+		headers := http.Header{}
+		headers.Set("Accept", "text/plain")
+
+		ctx := context.Background()
+		res, err := client.DoCustomRequestWithHeaders(ctx, "GET", "admin/workflow/resources", headers, nil)
+		if err != nil {
+			t.Errorf("error making custom request: %s", err)
+		}
+
+		defer func(res *http.Response) {
+			err := res.Body.Close()
+			if err != nil {
+				t.Errorf("error closing response body: %s", err)
+			}
+		}(res)
+
+		resBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("error reading response body: %s", err)
+		}
+
+		got := string(resBody)
+		want := "plain text response"
+
+		if got != want {
+			t.Errorf("response body: got %s, want %s", got, want)
+		}
+
+		t.Cleanup(server.Close)
+	})
+}
