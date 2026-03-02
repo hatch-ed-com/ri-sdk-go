@@ -1,0 +1,27 @@
+{
+    "name": "Go Claude Code",
+    "image": "mcr.microsoft.com/devcontainers/go",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+        "ghcr.io/w3cj/devcontainer-features/firewall:latest": {
+            "hosts": "proxy.golang.org",
+            "claudeCode": true,
+            "githubIps": true,
+            "githubDomains": true
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": ["anthropic.claude-code"]
+        }
+    },
+    "mounts": [
+        "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+        "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume"
+    ],
+    "containerEnv": {
+        "NODE_OPTIONS": "--max-old-space-size=4096",
+        "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+    }
+}
