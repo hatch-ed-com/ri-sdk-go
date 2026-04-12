@@ -350,8 +350,8 @@ func (c *Client) Close() error {
 // the path should be admin/workflow/resources
 //
 // When the body is present the Content-Type header is
-// set to application/json. Other Content-Types are not
-// currently supported.
+// set to application/json. If you would like to add
+// additional headers use DoCustomRequestWithHeaders.
 func (c *Client) DoCustomRequest(ctx context.Context, method string, path string, body io.Reader) (*http.Response, error) {
 	endpointUrl := fmt.Sprintf("%s/%s", c.baseEndpoint, path)
 	req, err := c.GenerateRequest(ctx, method, endpointUrl, body)
@@ -361,6 +361,41 @@ func (c *Client) DoCustomRequest(ctx context.Context, method string, path string
 
 	if body != nil {
 		req.Header.Add("Content-Type", "application/json")
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// DoCustomRequestWithHeaders allows users to make custom API calls
+// with custom headers that may not be included in the client methods.
+// The path should be the endpoint path after /api/rest/
+// For example, to make a request to /api/rest/admin/workflow/resources
+// the path should be admin/workflow/resources
+//
+// Custom headers are applied using Set, so they will override any
+// default headers set by GenerateRequest (e.g., Accept).
+// If no Content-Type header is provided and the body is not nil,
+// the Content-Type will default to application/json.
+func (c *Client) DoCustomRequestWithHeaders(ctx context.Context, method string, path string, headers http.Header, body io.Reader) (*http.Response, error) {
+	endpointUrl := fmt.Sprintf("%s/%s", c.baseEndpoint, path)
+	req, err := c.GenerateRequest(ctx, method, endpointUrl, body)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, values := range headers {
+		for _, value := range values {
+			req.Header.Set(key, value)
+		}
+	}
+
+	if req.Header.Get("Content-Type") == "" && body != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	res, err := c.httpClient.Do(req)
