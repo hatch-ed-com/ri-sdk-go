@@ -20,9 +20,12 @@ func main() {
 		log.Fatal(err)
 	}
 	options := rapididentity.Options{
-		HTTPClient:      &http.Client{},
-		BaseUrl:         baseUrl,
-		ServiceIdentity: os.Getenv("RI_KEY"),
+		HTTPClient: &http.Client{},
+		BaseUrl:    baseUrl,
+		RapidIdentityUser: &rapididentity.RapidIdentityUser{
+			Username: os.Getenv("RI_USER"),
+			Password: os.Getenv("RI_PWD"),
+		},
 	}
 
 	client, err := rapididentity.New(options)
@@ -36,12 +39,12 @@ func main() {
 	}
 	defer client.Close()
 
-	body := bytes.NewBufferString("plain text body")
+	body := bytes.NewBufferString("(idautoID=af6f331b-8dea-40f9-a71b-ac06c243e280)")
 	headers := http.Header{}
 	headers.Set("Content-Type", "text/plain")
 
 	ctx := context.Background()
-	res, err := client.DoCustomRequestWithHeaders(ctx, "POST", "connect/actionSets/execute", headers, body)
+	res, err := client.DoCustomRequestWithHeaders(ctx, "POST", "profiles/delegations/my/00ed6244-e17b-440e-bb39-1e631642206d/profiles/searchByFilter", headers, body)
 	if err != nil {
 		var riError rapididentity.RapidIdentityError
 		ok := errors.As(err, &riError)
