@@ -31,7 +31,7 @@ func TestRunAuditReport(t *testing.T) {
 		}
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w,
-			`{ 
+			`{
 				"auditLogRecords": [
 					{
 						"id": "%s"
@@ -82,5 +82,36 @@ func TestRunAuditReport(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestRunAuditReportPagination(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/reporting/auditQuery", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testQueryParam(t, r, "page_size", "10")
+		testQueryParam(t, r, "page_token", "abc123")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, `{"auditLogRecords": [], "nextPageToken": "def456"}`)
+	})
+
+	input := RunAuditReportInput{
+		Query:     AuditReportQuery{OperatorType: AND},
+		PageSize:  10,
+		PageToken: "abc123",
+	}
+
+	ctx := context.Background()
+	output, err := client.RunAuditReport(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.NextPageToken
+	want := "def456"
+
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
 	}
 }

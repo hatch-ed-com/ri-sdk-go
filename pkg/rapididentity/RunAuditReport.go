@@ -27,6 +27,13 @@ type RunAuditReportInput struct {
 	// The query to run
 	// This is a required member
 	Query AuditReportQuery
+
+	// The maximum number of records to return per page
+	PageSize int
+
+	// The token for the next page of results,
+	// retrieved from RunAuditReportOutput.NextPageToken
+	PageToken string
 }
 
 // Audt report query component
@@ -100,6 +107,11 @@ type RunAuditReportOutput struct {
 	// Whether the limit has been reached
 	// for the number of results
 	AdminLimitEnforced bool `json:"adminLimitEnforced"`
+
+	// Token for retrieving the next page of results.
+	// Pass this value as RunAuditReportInput.PageToken in the next call.
+	// Empty when there are no more pages.
+	NextPageToken string `json:"nextPageToken"`
 }
 
 // Result for an audit report query
@@ -199,6 +211,14 @@ type AuditReportExtendedProperties struct {
 //meta:operation POST /reporting/auditQuery
 func (c *Client) RunAuditReport(ctx context.Context, params RunAuditReportInput) (*RunAuditReportOutput, error) {
 	url := fmt.Sprintf("%s/reporting/auditQuery", c.baseEndpoint)
+	sep := "?"
+	if params.PageSize > 0 {
+		url += fmt.Sprintf("%spage_size=%d", sep, params.PageSize)
+		sep = "&"
+	}
+	if params.PageToken != "" {
+		url += fmt.Sprintf("%spage_token=%s", sep, params.PageToken)
+	}
 	query, err := json.Marshal(params.Query)
 	if err != nil {
 		return nil, err

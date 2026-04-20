@@ -67,6 +67,7 @@ func main() {
 			},
 			OperatorType: rapididentity.AND,
 		},
+		PageSize: 2,
 	}
 
 	ctx := context.Background()
