@@ -12,11 +12,11 @@ type GetConnectFileContentZipInput struct {
 	// This can also be used to retrieve job and run logs
 	// by setting the path to log/job or log/run.
 	// This member is required
-	PathList []string
+	PathList []string `json:"pathList" jsonschema:"An array of paths to the files to retrieve. This can also be used to retrieve job and run logs by setting the path to log/job or log/run. This member is required"`
 
 	// The connect project name that the directory or file resides
 	// The default is the .Main project
-	Project string
+	Project string `json:"project" jsonschema:"The connect project name that the directory or file resides The default is the .Main project"`
 }
 
 // Retrieves multiple files zipped from the Connect files

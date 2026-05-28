@@ -13,37 +13,37 @@ type GetConnectFilesInput struct {
 	// This can also be used to retrieve job and run logs
 	// by setting the path to log/job or log/run.
 	// This member is required
-	Path string
+	Path string `json:"path" jsonschema:"The path to the directory or file metadata to retrieve. This can also be used to retrieve job and run logs by setting the path to log/job or log/run. This member is required"`
 
 	// The connect project name that the directory or file resides
 	// The default is the .Main project
-	Project string
+	Project string `json:"project" jsonschema:"The connect project name that the directory or file resides The default is the .Main project"`
 
 	// The format of the result
 	// The default is application/json
-	ResponseType string
+	ResponseType string `json:"responseType" jsonschema:"The format of the result The default is application/json"`
 }
 
 // Represents the metadata of a file
 type FileEntry struct {
 	// The path to the directory or file
-	Path string `json:"path"`
+	Path string `json:"path" jsonschema:"The path to the directory or file"`
 
 	// The size of the file in bytes
-	Size int `json:"size"`
+	Size int `json:"size" jsonschema:"The size of the file in bytes"`
 
 	// The unix timestamp in milliseconds of when the
 	// file or directory was modified
-	Timestamp int64 `json:"timestamp"`
+	Timestamp int64 `json:"timestamp" jsonschema:"The unix timestamp in milliseconds of when the file or directory was modified"`
 
 	// The Connect project where the file or directory resides
-	Project string `json:"project"`
+	Project string `json:"project" jsonschema:"The Connect project where the file or directory resides"`
 
 	// Whether or not the file or directory is readable
-	Readable bool `json:"readable"`
+	Readable bool `json:"readable" jsonschema:"Whether or not the file or directory is readable"`
 
 	// Whether or not the file or directory is writable
-	Writable bool `json:"writable"`
+	Writable bool `json:"writable" jsonschema:"Whether or not the file or directory is writable"`
 }
 
 // Output for retrieving Connect files metadata
@@ -53,7 +53,7 @@ type GetConnectFilesOutput struct {
 	// If the path is a directory this will contain
 	// the list of all files in the directory.
 	// Only goes one level deep
-	FileEntries []FileEntry `json:"fileEntries"`
+	FileEntries []FileEntry `json:"fileEntries" jsonschema:"If the path is a directory this will contain the list of all files in the directory. Only goes one level deep"`
 }
 
 // Retrieves metadata for files within the Connect files

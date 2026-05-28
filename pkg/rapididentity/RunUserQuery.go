@@ -12,18 +12,18 @@ import (
 type RunUserQueryInput struct {
 	// The type of search to initiate.
 	// The default is "advanced".
-	SearchType string
+	SearchType string `json:"searchType" jsonschema:"The type of search to initiate. The default is \"advanced\"."`
 
 	// The maximum amount of users to return.
 	// The default is 1000.
-	Limit int
+	Limit int `json:"limit" jsonschema:"The maximum amount of users to return. The default is 1000."`
 
 	// The delegation ids of the delegations that
 	// will be searched.
-	DelegationIds []string
+	DelegationIds []string `json:"delegationIds" jsonschema:"The delegation ids of the delegations that will be searched."`
 
 	// The user query to run.
-	Query AuditReportQuery
+	Query AuditReportQuery `json:"query" jsonschema:"The user query to run."`
 }
 
 // Run a user query.
