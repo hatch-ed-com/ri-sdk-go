@@ -12,20 +12,20 @@ type GetConnectActionsInput struct {
 	// If empty, all projects will be searched.
 	// For identifying the <Main> project use the
 	// const variable MainProject.
-	Project string
+	Project string `json:"project" jsonschema:"The Connect project to filter by. If empty, all projects will be searched. For identifying the <Main> project use the const variable MainProject."`
 
 	// Whether to return full action details
 	// or just metadata.
-	MetaDataOnly bool
+	MetaDataOnly bool `json:"metaDataOnly" jsonschema:"Whether to return full action details or just metadata."`
 }
 
 // Output for retrieving Connect actions
 type GetConnectActionsOutput struct {
 	// Query type name. For example "all".
-	Name string
+	Name string `json:"name" jsonschema:"Query type name. For example \"all\"."`
 
 	// The list of actions.
-	ActionDefs []ActionDef
+	ActionDefs []ActionDef `json:"actionDefs" jsonschema:"The list of actions."`
 }
 
 // Retrieves actions from Connect.

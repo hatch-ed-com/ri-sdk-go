@@ -11,7 +11,7 @@ import (
 type GetUserByIdInput struct {
 	// The DN or idautoID of the user
 	// to retrieve.
-	Id string
+	Id string `json:"id" jsonschema:"The DN or idautoID of the user to retrieve."`
 }
 
 // Retrieve a RapidIdentity user by DN or idautoID.

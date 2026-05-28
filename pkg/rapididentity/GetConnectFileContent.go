@@ -14,21 +14,21 @@ type GetConnectFileContentInput struct {
 	// This can also be used to retrieve job and run logs
 	// by setting the path to log/job or log/run.
 	// This member is required
-	Path string
+	Path string `json:"path" jsonschema:"The path to the file to retrieve. This can also be used to retrieve job and run logs by setting the path to log/job or log/run. This member is required"`
 
 	// The connect project name that the directory or file resides
 	// The default is the .Main project
-	Project string
+	Project string `json:"project" jsonschema:"The connect project name that the directory or file resides The default is the .Main project"`
 
 	// Determines whether to decompress file on the
 	// RapidIdentity Server. At this time, there
 	// is a bug in retrieving a compressed
 	// file
-	Decompress bool
+	Decompress bool `json:"decompress" jsonschema:"Determines whether to decompress file on the RapidIdentity Server. At this time, there is a bug in retrieving a compressed file"`
 
 	// The format of the result
 	// The default is text/plain
-	ResponseType string
+	ResponseType string `json:"responseType" jsonschema:"The format of the result The default is text/plain"`
 }
 
 // Retrieves file content from a file within the Connect files
