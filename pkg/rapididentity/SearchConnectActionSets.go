@@ -40,7 +40,7 @@ type SearchConnectActionSetsOutput struct {
 	Description string `json:"description" jsonschema:"The description of the search query."`
 
 	// The action set definition results.
-	ActionDefs []ActionDef `json:"actionDefs" jsonschema:"The action set definition results."`
+	ActionDefs ActionDefList `json:"actionDefs" jsonschema:"The action set definition results."`
 
 	// The http status code returned.
 	HttpStatus int `json:"httpStatus" jsonschema:"The http status code returned."`
@@ -81,10 +81,10 @@ type ActionDef struct {
 	Sensitive bool `json:"sensitive" jsonschema:"Whether the action set contains sensitive information."`
 
 	// The input parameters of the action set.
-	ArgDefs []ArgDef `json:"argDefs" jsonschema:"The input parameters of the action set."`
+	ArgDefs ArgDefList `json:"argDefs" jsonschema:"The input parameters of the action set."`
 
 	// The actions within the action set.
-	Actions []ConnectAction `json:"actions" jsonschema:"The actions within the action set."`
+	Actions ConnectActionList `json:"actions" jsonschema:"The actions within the action set."`
 
 	// Whether the action set is deprecated.
 	Deprecated string `json:"deprecated" jsonschema:"Whether the action set is deprecated."`
@@ -105,6 +105,15 @@ type ActionDef struct {
 	ModifiedByName string `json:"modifiedByName" jsonschema:"The display name of the user who modified the action set."`
 }
 
+type ActionDefList []ActionDef
+
+func (adl ActionDefList) MarshalJSON() ([]byte, error) {
+	if adl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ActionDef(adl))
+}
+
 type ArgDef struct {
 	// Whether the action set input parameter is optional.
 	Optional bool `json:"optional" jsonschema:"Whether the action set input parameter is optional."`
@@ -117,6 +126,15 @@ type ArgDef struct {
 
 	// The description for the input parameter.
 	Description string `json:"description" jsonschema:"The description for the input parameter."`
+}
+
+type ArgDefList []ArgDef
+
+func (arg ArgDefList) MarshalJSON() ([]byte, error) {
+	if arg == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ArgDef(arg))
 }
 
 type ConnectAction struct {
@@ -136,7 +154,16 @@ type ConnectAction struct {
 	Project string `json:"project" jsonschema:"The project where the action resides."`
 
 	// The input parameters for the action.
-	Args []ConnectActionArg `json:"args" jsonschema:"The input parameters for the action."`
+	Args ConnectActionArgList `json:"args" jsonschema:"The input parameters for the action."`
+}
+
+type ConnectActionList []ConnectAction
+
+func (cal ConnectActionList) MarshalJSON() ([]byte, error) {
+	if cal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ConnectAction(cal))
 }
 
 type ConnectActionArg struct {
@@ -147,10 +174,19 @@ type ConnectActionArg struct {
 	Value string `json:"value" jsonschema:"The value of the input parameter."`
 
 	// The Connect actions.
-	Actions []ConnectAction `json:"actions" jsonschema:"The Connect actions."`
+	Actions ConnectActionList `json:"actions" jsonschema:"The Connect actions."`
 
 	// The http status code returned.
 	HttpStatus int `json:"httpStatus" jsonschema:"The http status code returned."`
+}
+
+type ConnectActionArgList []ConnectActionArg
+
+func (caal ConnectActionArgList) MarshalJSON() ([]byte, error) {
+	if caal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ConnectActionArg(caal))
 }
 
 // Searches for text within action sets in a project.
