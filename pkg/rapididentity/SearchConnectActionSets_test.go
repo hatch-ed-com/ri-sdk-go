@@ -49,7 +49,6 @@ func TestSearchConnectActionSets(t *testing.T) {
 func TestActionDefSlice_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
-	// Define a test case matrix for all types that should force `[]`
 	tests := []struct {
 		name        string
 		input       interface{}
@@ -91,12 +90,10 @@ func TestActionDefSlice_MarshalJSON_ZeroValue(t *testing.T) {
 
 			result := string(marshaledBytes)
 
-			// Assert that it overrode null with an empty array literal
 			if !strings.Contains(result, tt.mustContain) {
 				t.Errorf("expected JSON to contain %q, but got: %s", tt.mustContain, result)
 			}
 
-			// Defensive check: ensure "null" didn't sneak in anywhere
 			if strings.Contains(result, ":null") {
 				t.Errorf("detected unexpected 'null' value in marshaled output: %s", result)
 			}
