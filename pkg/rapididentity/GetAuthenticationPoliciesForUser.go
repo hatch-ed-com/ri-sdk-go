@@ -7,6 +7,33 @@ import (
 	"fmt"
 )
 
+type AuthenticationPolicyList []AuthenticationPolicy
+
+func (apl AuthenticationPolicyList) MarshalJSON() ([]byte, error) {
+	if apl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuthenticationPolicy(apl))
+}
+
+type AuthenticationPolicyCriteriaList []AuthenticationPolicyCriteria
+
+func (apcl AuthenticationPolicyCriteriaList) MarshalJSON() ([]byte, error) {
+	if apcl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuthenticationPolicyCriteria(apcl))
+}
+
+type AuthenticationPolicyMethodList []AuthenticationPolicyMethod
+
+func (apml AuthenticationPolicyMethodList) MarshalJSON() ([]byte, error) {
+	if apml == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuthenticationPolicyMethod(apml))
+}
+
 // Params for GetAuthenticationPoliciesForUser method.
 type GetAuthenticationPoliciesForUserInput struct {
 	// Whether to provide authentication policies in response.
@@ -19,7 +46,7 @@ type GetAuthenticationPoliciesForUserInput struct {
 
 	// The fields to show in the authenticationPolicies
 	// response. By default all fields are shown.
-	AuthenticationPolicyFieldsToShow []string `json:"authenticationPolicyFieldsToShow" jsonschema:"The fields to show in the authenticationPolicies response. By default all fields are shown."`
+	AuthenticationPolicyFieldsToShow StringList `json:"authenticationPolicyFieldsToShow" jsonschema:"The fields to show in the authenticationPolicies response. By default all fields are shown."`
 
 	// The user to get authentication policies.
 	User GetAuthenticationPoliciesForUserPayload `json:"user" jsonschema:"The user to get authentication policies."`
@@ -39,7 +66,7 @@ type GetAuthenticationPoliciesForUserOutput struct {
 	User User `json:"user" jsonschema:"User information for the username provided in the request."`
 
 	// Authentication policies for the username provided in the request.
-	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies" jsonschema:"Authentication policies for the username provided in the request."`
+	AuthenticationPolicies AuthenticationPolicyList `json:"authenticationPolicies" jsonschema:"Authentication policies for the username provided in the request."`
 }
 
 // RapidIdentity authentication policy information.
@@ -61,14 +88,14 @@ type AuthenticationPolicy struct {
 	// returns several different objects. Due to this
 	// several Criteria structs were created such as
 	// DaysOfTheWeekCriteria that implement the interface.
-	Criteria []AuthenticationPolicyCriteria `json:"criteria" jsonschema:"The criteria for the authentication policy. This utilize an interface as the criteria array returns several different objects. Due to this several Criteria structs were created such as DaysOfTheWeekCriteria that implement the interface."`
+	Criteria AuthenticationPolicyCriteriaList `json:"criteria" jsonschema:"The criteria for the authentication policy. This utilize an interface as the criteria array returns several different objects. Due to this several Criteria structs were created such as DaysOfTheWeekCriteria that implement the interface."`
 
 	// The methods for the authentication policy.
 	// This utilize an interface as the methods array
 	// returns several different objects. Due to this
 	// several Method structs were created such as
 	// DuoMethod that implement the interface.
-	Methods []AuthenticationPolicyMethod `json:"methods" jsonschema:"The methods for the authentication policy. This utilize an interface as the methods array returns several different objects. Due to this several Method structs were created such as DuoMethod that implement the interface."`
+	Methods AuthenticationPolicyMethodList `json:"methods" jsonschema:"The methods for the authentication policy. This utilize an interface as the methods array returns several different objects. Due to this several Method structs were created such as DuoMethod that implement the interface."`
 
 	// Whether the authentication policy can be initated with a QR Code.
 	InsecureQRIdEnabled bool `json:"insecureQRIdEnabled" jsonschema:"Whether the authentication policy can be initated with a QR Code."`
@@ -410,7 +437,7 @@ func (qcc QrCodeCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthentication
 type SourceNetworkCriteria struct {
 	BaseAuthenticationInfo
 	// List of subnets to evaluate.
-	Subnets []string `json:"subnets" jsonschema:"List of subnets to evaluate."`
+	Subnets StringList `json:"subnets" jsonschema:"List of subnets to evaluate."`
 
 	// Allow for insecure http.
 	EnableHttpHeaderProcessing bool `json:"enableHttpHeaderProcessing" jsonschema:"Allow for insecure http."`
@@ -423,13 +450,22 @@ func (snc SourceNetworkCriteria) GetBaseAuthenticationCriteriaInfo() BaseAuthent
 	return snc.BaseAuthenticationInfo
 }
 
+type RoleAuthValueList []RoleAuthValue
+
+func (ravl RoleAuthValueList) MarshalJSON() ([]byte, error) {
+	if ravl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]RoleAuthValue(ravl))
+}
+
 // Determines if authentication policy is satisfied based on
 // user being within certain roles.
 type RoleCriteria struct {
 	BaseAuthenticationInfo
 
 	// List of roles to evaluate.
-	Roles []RoleAuthValue `json:"roles" jsonschema:"List of roles to evaluate."`
+	Roles RoleAuthValueList `json:"roles" jsonschema:"List of roles to evaluate."`
 
 	// Whether to apply policy to everyone.
 	ApplyToEveryone bool `json:"applyToEveryone" jsonschema:"Whether to apply policy to everyone."`
@@ -601,7 +637,7 @@ type PictographMethod struct {
 	UseDefaultImagePool bool `json:"useDefaultImagePool" jsonschema:"Whether to use the default pool of images or custom images."`
 
 	// The imageIds to use if custom image pool is used.
-	ImageIds []string `json:"imageIds" jsonschema:"The imageIds to use if custom image pool is used."`
+	ImageIds StringList `json:"imageIds" jsonschema:"The imageIds to use if custom image pool is used."`
 }
 
 func (pm PictographMethod) GetBaseAuthenticationMethodInfo() BaseAuthenticationInfo {

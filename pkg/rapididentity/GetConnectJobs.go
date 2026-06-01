@@ -14,10 +14,19 @@ type GetConnectJobsInput struct {
 	Project string `json:"project" jsonschema:"The connect project name to retrieve jobs. For identifying the <Main> project use the const variable MainProject."`
 }
 
+type ConnectJobList []ConnectJob
+
+func (cjl ConnectJobList) MarshalJSON() ([]byte, error) {
+	if cjl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ConnectJob(cjl))
+}
+
 // Output for retrieving Connect jobs
 type GetConnectJobsOutput struct {
 	// List of Connect jobs.
-	Jobs []ConnectJob `json:"jobs" jsonschema:"List of Connect jobs."`
+	Jobs ConnectJobList `json:"jobs" jsonschema:"List of Connect jobs."`
 }
 
 type ConnectJob struct {

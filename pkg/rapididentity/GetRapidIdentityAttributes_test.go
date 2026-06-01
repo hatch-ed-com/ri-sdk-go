@@ -2,6 +2,7 @@ package rapididentity
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -31,5 +32,21 @@ func TestGetLdapAttributes(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestGetRapidIdentityAttributes_MarshalJSON_ZeroValue(t *testing.T) {
+	t.Parallel()
+
+	var list StringList = nil
+	marshaledBytes, err := json.Marshal(list)
+	if err != nil {
+		t.Fatalf("failed to marshal StringList: %v", err)
+	}
+
+	result := string(marshaledBytes)
+	want := "[]"
+	if result != want {
+		t.Errorf("got %s, want %s", result, want)
 	}
 }

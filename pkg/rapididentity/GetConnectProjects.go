@@ -6,10 +6,19 @@ import (
 	"fmt"
 )
 
+type ConnectProjectList []ConnectProject
+
+func (cpl ConnectProjectList) MarshalJSON() ([]byte, error) {
+	if cpl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ConnectProject(cpl))
+}
+
 // Output for retrieving Connect projects
 type GetConnectProjectsOutput struct {
 	// List of Connect projects.
-	Projects []ConnectProject `json:"projects" jsonschema:"List of Connect projects."`
+	Projects ConnectProjectList `json:"projects" jsonschema:"List of Connect projects."`
 }
 
 type ConnectProject struct {
@@ -50,6 +59,15 @@ type ConnectProject struct {
 	ModifiedByName string `json:"modifiedByName" jsonschema:"The display name of the user who made the last update."`
 }
 
+type RestPointList []RestPoint
+
+func (rpl RestPointList) MarshalJSON() ([]byte, error) {
+	if rpl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]RestPoint(rpl))
+}
+
 type RestPointConfig struct {
 	// Whether RESTPoints are enabled.
 	Disabled bool `json:"disabled" jsonschema:"Whether RESTPoints are enabled."`
@@ -58,7 +76,7 @@ type RestPointConfig struct {
 	AuthSpec AuthSpecConfig `json:"authSpec" jsonschema:"The default authentication used for the RESTPoints."`
 
 	// The RESTPoints information.
-	RestPoints []RestPoint `json:"restPoints" jsonschema:"The RESTPoints information."`
+	RestPoints RestPointList `json:"restPoints" jsonschema:"The RESTPoints information."`
 }
 
 type AuthSpecConfig struct {
@@ -77,6 +95,15 @@ type AuthSpecConfig struct {
 	// Basic authentication utilizing OAuth1 consumer keys
 	// in the Connect module.
 	BasicWithOAuthKeys bool `json:"basicWithOAuthKeys" jsonschema:"Basic authentication utilizing OAuth1 consumer keys in the Connect module."`
+}
+
+type RestPointArgMapList []RestPointArgMap
+
+func (rpaml RestPointArgMapList) MarshalJSON() ([]byte, error) {
+	if rpaml == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]RestPointArgMap(rpaml))
 }
 
 type RestPoint struct {
@@ -103,7 +130,7 @@ type RestPoint struct {
 
 	// The arguments passed into the action set.
 	// input parameters.
-	ArgMap []RestPointArgMap `json:"argMap" jsonschema:"The arguments passed into the action set. input parameters."`
+	ArgMap RestPointArgMapList `json:"argMap" jsonschema:"The arguments passed into the action set. input parameters."`
 }
 
 type RestPointArgMap struct {

@@ -69,6 +69,7 @@ type GetBootstrapInfoOutput struct {
 	IsIdAutoAppleEnabled bool `json:"isIdAutoAppleEnabled" jsonschema:"Whether the new Apple Social login is enabled."`
 }
 
+
 type LicenseInfo struct {
 	// The license type such as subscription.
 	Type string `json:"type" jsonschema:"The license type such as subscription."`
@@ -90,7 +91,7 @@ type LicenseInfo struct {
 	LicensedUserCount int `json:"licensedUserCount" jsonschema:"The number of licensed users."`
 
 	// The modules provided by the license (Legacy)
-	Modules []string `json:"modules" jsonschema:"The modules provided by the license (Legacy)"`
+	Modules StringList `json:"modules" jsonschema:"The modules provided by the license (Legacy)"`
 }
 
 type VersionInfo struct {
@@ -183,7 +184,7 @@ type TabInfo struct {
 type TabActionInfo struct {
 	TabInfo
 	// Available actions within the specified module tab.
-	Actions []string `json:"actions" jsonschema:"Available actions within the specified module tab."`
+	Actions StringList `json:"actions" jsonschema:"Available actions within the specified module tab."`
 }
 
 type TabAdminInfo struct {
@@ -277,10 +278,10 @@ type RolesModuleInfo struct {
 	EnableGroupTypeSelection bool `json:"enableGroupTypeSelection" jsonschema:"Whether to enable selection of group types."`
 
 	// Available group types to choose form if group type selection is enabled.
-	PossibleGroupTypes []string `json:"possibleGroupTypes" jsonschema:"Available group types to choose form if group type selection is enabled."`
+	PossibleGroupTypes StringList `json:"possibleGroupTypes" jsonschema:"Available group types to choose form if group type selection is enabled."`
 
 	// Allowed group types to choose from if group type selection is enabled.
-	AllowedGroupTypes []string `json:"allowedGroupTypes" jsonschema:"Allowed group types to choose from if group type selection is enabled."`
+	AllowedGroupTypes StringList `json:"allowedGroupTypes" jsonschema:"Allowed group types to choose from if group type selection is enabled."`
 
 	// Whether to preload all groups in Groups module.
 	PreloadGroups bool `json:"preloadGroups" jsonschema:"Whether to preload all groups in Groups module."`
@@ -298,7 +299,7 @@ type RolesModuleInfo struct {
 	OtherTabInfo TabActionInfo `json:"otherTabInfo" jsonschema:"Visibility and actions for the Other Groups tab."`
 
 	// Any custom attributes added to the groups module.
-	CustomAttributes []DelegationAttribute `json:"customAttributes" jsonschema:"Any custom attributes added to the groups module."`
+	CustomAttributes DelegationAttributeList `json:"customAttributes" jsonschema:"Any custom attributes added to the groups module."`
 
 	// Whether wildcard (*) searches are allowed.
 	EnableWildcardSearch bool `json:"enableWildcardSearch" jsonschema:"Whether wildcard (*) searches are allowed."`
@@ -332,7 +333,7 @@ type SponsorshipModuleInfo struct {
 	PreloadSponsoredAccounts bool `json:"preloadSponsoredAccounts" jsonschema:"Whether to load all sponsored accounts upon accessing the Sponsorship module."`
 
 	// Custom attributes added to the sponsorship module.
-	CustomAttributes []DelegationAttribute `json:"customAttributes" jsonschema:"Custom attributes added to the sponsorship module."`
+	CustomAttributes DelegationAttributeList `json:"customAttributes" jsonschema:"Custom attributes added to the sponsorship module."`
 }
 
 type WorkflowModuleInfo struct {

@@ -36,10 +36,28 @@ type RunAuditReportInput struct {
 	PageToken string `json:"pageToken" jsonschema:"The token for the next page of results, retrieved from RunAuditReportOutput.NextPageToken"`
 }
 
+type AuditReportQueryList []AuditReportQuery
+
+func (arql AuditReportQueryList) MarshalJSON() ([]byte, error) {
+	if arql == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuditReportQuery(arql))
+}
+
+type AuditReportFieldValueList []AuditReportFieldValue
+
+func (arfvl AuditReportFieldValueList) MarshalJSON() ([]byte, error) {
+	if arfvl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuditReportFieldValue(arfvl))
+}
+
 // Audt report query component
 type AuditReportQuery struct {
 	// A grouping of query operations
-	ChildNodes []AuditReportQuery `json:"childNodes" jsonschema:"A grouping of query operations"`
+	ChildNodes AuditReportQueryList `json:"childNodes" jsonschema:"A grouping of query operations"`
 
 	// Query comment
 	Comment string `json:"comment" jsonschema:"Query comment"`
@@ -64,7 +82,7 @@ type AuditReportQuery struct {
 	FieldValue string `json:"fieldValue" jsonschema:"The field value to filter on. In some cases field values are specific, and require knowing a list of values. One such example is action.displayName which requires a value retrieved from the reporting/possibleValues?type=AUDIT&key=action.displayName endpoint"`
 
 	// The field values to filter on
-	FieldValues []AuditReportFieldValue `json:"fieldValues" jsonschema:"The field values to filter on"`
+	FieldValues AuditReportFieldValueList `json:"fieldValues" jsonschema:"The field values to filter on"`
 
 	// The id of the AuditReportQuery. This is
 	// utilized for the ParentNode relationship
@@ -77,7 +95,6 @@ type AuditReportQuery struct {
 	// The parent node of the operation
 	ParentNode string `json:"parentNode" jsonschema:"The parent node of the operation"`
 }
-
 // Field value for relative days and users
 type AuditReportFieldValue struct {
 	// The dn of the user you are referencing.
@@ -98,11 +115,20 @@ type AuditReportFieldValue struct {
 	Name string `json:"name" jsonschema:"The display name of the user or a relative day, such as LAST_7_DAYS"`
 }
 
+type AuditReportResultList []AuditReportResult
+
+func (arrl AuditReportResultList) MarshalJSON() ([]byte, error) {
+	if arrl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuditReportResult(arrl))
+}
+
 // The result provided by the RapidIdentity
 // server when running an audit report query
 type RunAuditReportOutput struct {
 	// List of audit records
-	AuditLogRecords []AuditReportResult `json:"auditLogRecords" jsonschema:"List of audit records"`
+	AuditLogRecords AuditReportResultList `json:"auditLogRecords" jsonschema:"List of audit records"`
 
 	// Whether the limit has been reached
 	// for the number of results
@@ -112,6 +138,15 @@ type RunAuditReportOutput struct {
 	// Pass this value as RunAuditReportInput.PageToken in the next call.
 	// Empty when there are no more pages.
 	NextPageToken string `json:"nextPageToken" jsonschema:"Token for retrieving the next page of results. Pass this value as RunAuditReportInput.PageToken in the next call. Empty when there are no more pages."`
+}
+
+type AuditReportExtendedPropertiesList []AuditReportExtendedProperties
+
+func (arepl AuditReportExtendedPropertiesList) MarshalJSON() ([]byte, error) {
+	if arepl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuditReportExtendedProperties(arepl))
 }
 
 // Result for an audit report query
@@ -175,7 +210,16 @@ type AuditReportResult struct {
 	Synced bool `json:"synced" jsonschema:"Whether the audit action was synced to other systems"`
 
 	// Additional properties for the audit event
-	ExtendedProperties []AuditReportExtendedProperties `json:"extendedProperties" jsonschema:"Additional properties for the audit event"`
+	ExtendedProperties AuditReportExtendedPropertiesList `json:"extendedProperties" jsonschema:"Additional properties for the audit event"`
+}
+
+type AuditReportBaseDetailList []AuditReportBaseDetail
+
+func (arbdl AuditReportBaseDetailList) MarshalJSON() ([]byte, error) {
+	if arbdl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]AuditReportBaseDetail(arbdl))
 }
 
 // Base details for several components
@@ -194,7 +238,7 @@ type AuditReportActionDetail struct {
 	Classification AuditReportBaseDetail `json:"classification" jsonschema:"Classification group of the action."`
 
 	// Categories the action is included in.
-	Categories []AuditReportBaseDetail `json:"categories" jsonschema:"Categories the action is included in."`
+	Categories AuditReportBaseDetailList `json:"categories" jsonschema:"Categories the action is included in."`
 }
 
 // Additional Properties syntax

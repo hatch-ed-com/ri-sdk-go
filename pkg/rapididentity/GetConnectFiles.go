@@ -46,6 +46,15 @@ type FileEntry struct {
 	Writable bool `json:"writable" jsonschema:"Whether or not the file or directory is writable"`
 }
 
+type FileEntryList []FileEntry
+
+func (fel FileEntryList) MarshalJSON() ([]byte, error) {
+	if fel == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]FileEntry(fel))
+}
+
 // Output for retrieving Connect files metadata
 type GetConnectFilesOutput struct {
 	FileEntry
@@ -53,7 +62,7 @@ type GetConnectFilesOutput struct {
 	// If the path is a directory this will contain
 	// the list of all files in the directory.
 	// Only goes one level deep
-	FileEntries []FileEntry `json:"fileEntries" jsonschema:"If the path is a directory this will contain the list of all files in the directory. Only goes one level deep"`
+	FileEntries FileEntryList `json:"fileEntries" jsonschema:"If the path is a directory this will contain the list of all files in the directory. Only goes one level deep"`
 }
 
 // Retrieves metadata for files within the Connect files
