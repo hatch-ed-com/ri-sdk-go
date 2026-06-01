@@ -137,7 +137,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const (
@@ -181,75 +180,6 @@ type RapidIdentityUser struct {
 
 	// RapidIdentity user password.
 	Password string `json:"password"`
-}
-
-// A RapidIdentity user session
-type Session struct {
-	// The session object.
-	Session SessionInfo `json:"session"`
-
-	// Whether a password update is required with the session.
-	PasswordUpdateRequired bool `json:"passwordUpdateRequired"`
-
-	// Number of logins remaining before user is locked out.
-	GraceLoginsRemaining int `json:"graceLoginsRemaining"`
-}
-type StringList []string
-
-func (sl StringList) MarshalJSON() ([]byte, error) {
-	if sl == nil {
-		return []byte("[]"), nil
-	}
-	return json.Marshal([]string(sl))
-}
-
-type SessionInfo struct {
-	// The session ID.
-	Id string `json:"id"`
-
-	// The session token.
-	Token string `json:"token"`
-
-	// The session user information. If using a proxy session
-	// this will be the proxied user.
-	User User `json:"user"`
-
-	// If using a proxy session this will be the user
-	// who invoked the proxy.
-	RealUser User `json:"realUser"`
-
-	// The RapidIdentity roles associated with the user
-	// This does not contain the groups the user is a member of.
-	Roles StringList `json:"roles"`
-
-	// When the session was created.
-	Created time.Time `json:"created"`
-
-	// The Client IP Address used to create the session.
-	CreatedClientIp string `json:"createdClientIp"`
-
-	// The Host IP address used to create the session.
-	CreatedHostIp string `json:"createdHostIp"`
-
-	// The time the session was last used.
-	LastUsed time.Time `json:"lastUsed"`
-
-	// The Client IP Address that was last used with the session.
-	LastUsedClientIp string `json:"lastUsedClientIp"`
-
-	// The Host IP Address that was last used with the session.
-	LastUsedHostIp string `json:"lastUsedHostIp"`
-
-	// When the session was invalidated.
-	Invalidated time.Time `json:"invalidated"`
-
-	// Proxy data associated with the session.
-	ProxyData ProxyData `json:"proxyData"`
-}
-
-type ProxyData struct {
-	// The RapidIdentity roles of the user who initiated the proxy
-	Permissions StringList `json:"permissions"`
 }
 
 // Client to make RapidIdentity REST API Calls.

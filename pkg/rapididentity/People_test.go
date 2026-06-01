@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -49,7 +50,102 @@ func TestGetDelegationsForUser(t *testing.T) {
 	}
 }
 
-func TestGetDelegationsForUserOutput_MarshalJSON_ZeroValue(t *testing.T) {
+func TestGetUserById(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/ldap/users/{dnOrId}", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		dnOrId := r.PathValue("dnOrId")
+		if dnOrId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "a DN or idautoID is required")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`{ 
+				"id": "%s"
+			}`,
+			dnOrId,
+		)
+	})
+
+	input := GetUserByIdInput{
+		Id: "1234",
+	}
+
+	ctx := context.Background()
+	output, err := client.GetUserById(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Id
+	want := input.Id
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestRunUserQuery(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/users", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Content-Type", "application/json")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		testQueryParam(t, r, "limit", "1000")
+		testQueryParam(t, r, "search", "advanced")
+		testQueryParam(t, r, "did", "white_pages")
+		var searchPayload AuditReportQuery
+		reqBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+		err = json.Unmarshal(reqBody, &searchPayload)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`[
+				{
+					"FirstName": "%s"
+				}
+			]`,
+			searchPayload.FieldValue)
+	})
+
+	input := RunUserQueryInput{
+		DelegationIds: []string{"white_pages"},
+		Query: AuditReportQuery{
+			FieldName:    "givenName",
+			OperatorType: EQUAL,
+			FieldValue:   "Jack",
+		},
+	}
+
+	ctx := context.Background()
+	output, err := client.RunUserQuery(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output[0].FirstName
+	want := input.Query.FieldValue
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestPeople_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -98,6 +194,13 @@ func TestGetDelegationsForUserOutput_MarshalJSON_ZeroValue(t *testing.T) {
 				Values: nil,
 			},
 			mustContain: `"values":[]`,
+		},
+		{
+			name: "RunUserQueryInput with nil DelegationIds",
+			input: RunUserQueryInput{
+				DelegationIds: nil,
+			},
+			mustContain: `"delegationIds":[]`,
 		},
 	}
 

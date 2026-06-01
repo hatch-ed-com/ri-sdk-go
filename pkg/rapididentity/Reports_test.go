@@ -117,7 +117,7 @@ func TestRunAuditReportPagination(t *testing.T) {
 	}
 }
 
-func TestRunAuditReportOutput_MarshalJSON_ZeroValue(t *testing.T) {
+func TestReports_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {

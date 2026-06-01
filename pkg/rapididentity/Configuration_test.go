@@ -65,7 +65,77 @@ func TestGetAuthenticationPoliciesForUser(t *testing.T) {
 	}
 }
 
-func TestGetAuthenticationPoliciesForUserOutput_MarshalJSON_ZeroValue(t *testing.T) {
+func TestGetBootstrapInfo(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/bootstrapInfo", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		testHeader(t, r, "Accept", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,
+			`{ 
+				"tenantId": "1234"
+			}`,
+		)
+	})
+	ctx := context.Background()
+
+	output, err := client.GetBootstrapInfo(ctx)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.TenantId
+	want := "1234"
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestGetLdapAttributes(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/ldap/schema/attributes", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,
+			`["cn"]`,
+		)
+	})
+
+	ctx := context.Background()
+	output, err := client.GetRapidIdentityAttributes(ctx)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output[0]
+	want := "cn"
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestGetRapidIdentityAttributes_MarshalJSON_ZeroValue(t *testing.T) {
+	t.Parallel()
+
+	var list StringList = nil
+	marshaledBytes, err := json.Marshal(list)
+	if err != nil {
+		t.Fatalf("failed to marshal StringList: %v", err)
+	}
+
+	result := string(marshaledBytes)
+	want := "[]"
+	if result != want {
+		t.Errorf("got %s, want %s", result, want)
+	}
+}
+func TestConfiguration_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
