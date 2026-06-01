@@ -13,8 +13,9 @@ type GetConnectActionsInput struct {
 	// The Connect project to filter by.
 	// If empty, all projects will be searched.
 	// For identifying the <Main> project use the
-	// const variable MainProject.
-	Project string `json:"project" jsonschema:"The Connect project to filter by. If empty, all projects will be searched. For identifying the <Main> project use the const variable MainProject."`
+	// const variable MainProject. For bulitin
+	// actions use $builtin
+	Project string `json:"project" jsonschema:"The Connect project to filter by. If empty, all projects will be searched. For identifying the <Main> project use the const variable MainProject. For builtin actions use $builtin"`
 
 	// Whether to return full action details
 	// or just metadata.
