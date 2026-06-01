@@ -95,6 +95,7 @@ type AuditReportQuery struct {
 	// The parent node of the operation
 	ParentNode string `json:"parentNode" jsonschema:"The parent node of the operation"`
 }
+
 // Field value for relative days and users
 type AuditReportFieldValue struct {
 	// The dn of the user you are referencing.

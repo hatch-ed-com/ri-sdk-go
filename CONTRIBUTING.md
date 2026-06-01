@@ -87,8 +87,7 @@ tasks.
 
 ## Other notes on code organization
 
-Currently, everything is defined in the main `rapididentity` package. Code is organized in files
-based on the RapidIdentity API Swagger documentation
+Currently, everything is defined in the main `rapididentity` package. Code is organized in files based on the RapidIdentity module name.
 
 ## Maintainer's Guide
 
