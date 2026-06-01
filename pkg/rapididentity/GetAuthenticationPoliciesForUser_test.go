@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -61,5 +62,79 @@ func TestGetAuthenticationPoliciesForUser(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestGetAuthenticationPoliciesForUserOutput_MarshalJSON_ZeroValue(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		input       interface{}
+		mustContain string
+	}{
+		{
+			name: "GetAuthenticationPoliciesForUserInput with nil slices",
+			input: GetAuthenticationPoliciesForUserInput{
+				AuthenticationPolicyFieldsToShow: nil,
+			},
+			mustContain: `"authenticationPolicyFieldsToShow":[]`,
+		},
+		{
+			name: "GetAuthenticationPoliciesForUserOutput with nil AuthenticationPolicies",
+			input: GetAuthenticationPoliciesForUserOutput{
+				AuthenticationPolicies: nil,
+			},
+			mustContain: `"authenticationPolicies":[]`,
+		},
+		{
+			name: "AuthenticationPolicy with nil slices",
+			input: AuthenticationPolicy{
+				Id:       "pol-1",
+				Criteria: nil,
+				Methods:  nil,
+			},
+			mustContain: `"criteria":[]`,
+		},
+		{
+			name: "SourceNetworkCriteria with nil Subnets",
+			input: SourceNetworkCriteria{
+				Subnets: nil,
+			},
+			mustContain: `"subnets":[]`,
+		},
+		{
+			name: "RoleCriteria with nil Roles",
+			input: RoleCriteria{
+				Roles: nil,
+			},
+			mustContain: `"roles":[]`,
+		},
+		{
+			name: "PictographMethod with nil ImageIds",
+			input: PictographMethod{
+				ImageIds: nil,
+			},
+			mustContain: `"imageIds":[]`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			marshaledBytes, err := json.Marshal(tt.input)
+			if err != nil {
+				t.Fatalf("failed to marshal struct: %v", err)
+			}
+
+			result := string(marshaledBytes)
+
+			if !strings.Contains(result, tt.mustContain) {
+				t.Errorf("expected JSON to contain %q, but got: %s", tt.mustContain, result)
+			}
+
+			if strings.Contains(result, ":null") {
+				t.Errorf("detected unexpected 'null' value in marshaled output: %s", result)
+			}
+		})
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -113,5 +114,67 @@ func TestRunAuditReportPagination(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s, want %s", got, want)
+	}
+}
+
+func TestRunAuditReportOutput_MarshalJSON_ZeroValue(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		input       interface{}
+		mustContain string
+	}{
+		{
+			name: "AuditReportQuery with nil slices",
+			input: AuditReportQuery{
+				OperatorType: AND,
+				ChildNodes:   nil,
+				FieldValues:  nil,
+			},
+			mustContain: `"childNodes":[]`,
+		},
+		{
+			name: "RunAuditReportOutput with nil AuditLogRecords",
+			input: RunAuditReportOutput{
+				AuditLogRecords: nil,
+			},
+			mustContain: `"auditLogRecords":[]`,
+		},
+		{
+			name: "AuditReportResult with nil ExtendedProperties",
+			input: AuditReportResult{
+				Id:                 "res-1",
+				ExtendedProperties: nil,
+			},
+			mustContain: `"extendedProperties":[]`,
+		},
+		{
+			name: "AuditReportActionDetail with nil Categories",
+			input: AuditReportActionDetail{
+				AuditReportBaseDetail: AuditReportBaseDetail{Id: "act-1"},
+				Categories:            nil,
+			},
+			mustContain: `"categories":[]`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			marshaledBytes, err := json.Marshal(tt.input)
+			if err != nil {
+				t.Fatalf("failed to marshal struct: %v", err)
+			}
+
+			result := string(marshaledBytes)
+
+			if !strings.Contains(result, tt.mustContain) {
+				t.Errorf("expected JSON to contain %q, but got: %s", tt.mustContain, result)
+			}
+
+			if strings.Contains(result, ":null") {
+				t.Errorf("detected unexpected 'null' value in marshaled output: %s", result)
+			}
+		})
 	}
 }

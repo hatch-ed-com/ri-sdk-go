@@ -25,7 +25,7 @@ type GetConnectActionsOutput struct {
 	Name string `json:"name" jsonschema:"Query type name. For example \"all\"."`
 
 	// The list of actions.
-	ActionDefs []ActionDef `json:"actionDefs" jsonschema:"The list of actions."`
+	ActionDefs ActionDefList `json:"actionDefs" jsonschema:"The list of actions."`
 }
 
 // Retrieves actions from Connect.

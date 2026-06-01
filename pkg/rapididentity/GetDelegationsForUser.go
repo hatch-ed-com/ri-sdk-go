@@ -21,6 +21,15 @@ type GetDelegationsForUserOutput struct {
 	AggregatedDelegation AggregatedDelegation `json:"aggregatedDelegation" jsonschema:"Full list of delegations and profiles for a user. Only provides delegations and profiles that are acessible by the invoking session."`
 }
 
+type DelegationProfileList []DelegationProfile
+
+func (dpl DelegationProfileList) MarshalJSON() ([]byte, error) {
+	if dpl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]DelegationProfile(dpl))
+}
+
 type AggregatedDelegation struct {
 	// idautoID of the user.
 	Id string `json:"id" jsonschema:"idautoID of the user."`
@@ -29,11 +38,11 @@ type AggregatedDelegation struct {
 	User User `json:"user" jsonschema:"Base user information."`
 
 	// Helpdesk questions for the user.
-	HelpdeskQuestions []string `json:"helpdeskQuestions" jsonschema:"Helpdesk questions for the user."`
+	HelpdeskQuestions StringList `json:"helpdeskQuestions" jsonschema:"Helpdesk questions for the user."`
 
 	// Profiles and delegations for the user
 	// that the invoking session has access.
-	DelegationProfiles []DelegationProfile `json:"delegationProfiles" jsonschema:"Profiles and delegations for the user that the invoking session has access."`
+	DelegationProfiles DelegationProfileList `json:"delegationProfiles" jsonschema:"Profiles and delegations for the user that the invoking session has access."`
 }
 
 type User struct {
@@ -62,7 +71,7 @@ type User struct {
 	ImageUrl string `json:"imageUrl" jsonschema:"Image url of the user."`
 
 	// Mobile numbers for the user.
-	MobileNumbers []string `json:"mobileNumbers" jsonschema:"Mobile numbers for the user."`
+	MobileNumbers StringList `json:"mobileNumbers" jsonschema:"Mobile numbers for the user."`
 
 	// Alternate email address for the user
 	AlternateEmail string `json:"alternateEmail" jsonschema:"Alternate email address for the user"`
@@ -78,6 +87,24 @@ type DelegationProfile struct {
 	// profiles that the invoking session has
 	// access.
 	Profile Profile `json:"profile" jsonschema:"Profiles for the user. Only provides profiles that the invoking session has access."`
+}
+
+type DelegationAttributeList []DelegationAttribute
+
+func (dal DelegationAttributeList) MarshalJSON() ([]byte, error) {
+	if dal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]DelegationAttribute(dal))
+}
+
+type ActionList []Action
+
+func (al ActionList) MarshalJSON() ([]byte, error) {
+	if al == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]Action(al))
 }
 
 type Delegation struct {
@@ -101,7 +128,7 @@ type Delegation struct {
 	TargetBaseDN string `json:"targetBaseDN" jsonschema:"The Base OU in RapidIdentity LDAP to start search for LDAP Objects. Target meaning what LDAP Objects that show up in the delegation view."`
 
 	// Attributes associated with the delegations.
-	Attributes []DelegationAttribute `json:"attributes" jsonschema:"Attributes associated with the delegations."`
+	Attributes DelegationAttributeList `json:"attributes" jsonschema:"Attributes associated with the delegations."`
 
 	// The image in the profile layout.
 	LayoutImage string `json:"layoutImage" jsonschema:"The image in the profile layout."`
@@ -119,7 +146,16 @@ type Delegation struct {
 	Layout3 string `json:"layout3" jsonschema:"The attribute to user for the 3 position of the profile layout."`
 
 	// The actions associated with the delegation.
-	Actions []Action `json:"actions" jsonschema:"The actions associated with the delegation."`
+	Actions ActionList `json:"actions" jsonschema:"The actions associated with the delegation."`
+}
+
+type ProfileAttributeList []ProfileAttribute
+
+func (pal ProfileAttributeList) MarshalJSON() ([]byte, error) {
+	if pal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]ProfileAttribute(pal))
 }
 
 type Profile struct {
@@ -128,7 +164,7 @@ type Profile struct {
 
 	// The attributes and values associated with
 	// the user's profiles.
-	Attributes []ProfileAttribute `json:"attributes" jsonschema:"The attributes and values associated with the user's profiles."`
+	Attributes ProfileAttributeList `json:"attributes" jsonschema:"The attributes and values associated with the user's profiles."`
 }
 
 type DelegationAttribute struct {
@@ -189,7 +225,7 @@ type ProfileAttribute struct {
 	Name string `json:"name" jsonschema:"The GalItem friendly name."`
 
 	// The value(s) of the attribute for the user
-	Values []string `json:"values" jsonschema:"The value(s) of the attribute for the user"`
+	Values StringList `json:"values" jsonschema:"The value(s) of the attribute for the user"`
 }
 
 // Gets all associated delegations and profiles for the user

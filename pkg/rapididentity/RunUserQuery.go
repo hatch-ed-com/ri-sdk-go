@@ -8,6 +8,15 @@ import (
 	"fmt"
 )
 
+type UserList []User
+
+func (ul UserList) MarshalJSON() ([]byte, error) {
+	if ul == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]User(ul))
+}
+
 // Input for getting users.
 type RunUserQueryInput struct {
 	// The type of search to initiate.
@@ -20,7 +29,7 @@ type RunUserQueryInput struct {
 
 	// The delegation ids of the delegations that
 	// will be searched.
-	DelegationIds []string `json:"delegationIds" jsonschema:"The delegation ids of the delegations that will be searched."`
+	DelegationIds StringList `json:"delegationIds" jsonschema:"The delegation ids of the delegations that will be searched."`
 
 	// The user query to run.
 	Query AuditReportQuery `json:"query" jsonschema:"The user query to run."`
@@ -29,8 +38,8 @@ type RunUserQueryInput struct {
 // Run a user query.
 //
 //meta:operation POST /users
-func (c *Client) RunUserQuery(ctx context.Context, params RunUserQueryInput) ([]User, error) {
-	var output []User
+func (c *Client) RunUserQuery(ctx context.Context, params RunUserQueryInput) (UserList, error) {
+	var output UserList
 	limit := cmp.Or(params.Limit, 1000)
 	searchType := cmp.Or(params.SearchType, "advanced")
 

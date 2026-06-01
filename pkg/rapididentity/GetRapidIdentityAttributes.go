@@ -9,8 +9,8 @@ import (
 // Retrieves RapidIdentity LDAP attributes.
 //
 //meta:operation GET /admin/ldap/schema/attributes
-func (c *Client) GetRapidIdentityAttributes(ctx context.Context) ([]string, error) {
-	var output []string
+func (c *Client) GetRapidIdentityAttributes(ctx context.Context) (StringList, error) {
+	var output StringList
 
 	url := fmt.Sprintf("%s/admin/ldap/schema/attributes", c.baseEndpoint)
 	req, err := c.GenerateRequest(ctx, "GET", url, nil)

@@ -194,6 +194,15 @@ type Session struct {
 	// Number of logins remaining before user is locked out.
 	GraceLoginsRemaining int `json:"graceLoginsRemaining"`
 }
+type StringList []string
+
+func (sl StringList) MarshalJSON() ([]byte, error) {
+	if sl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]string(sl))
+}
+
 type SessionInfo struct {
 	// The session ID.
 	Id string `json:"id"`
@@ -211,7 +220,7 @@ type SessionInfo struct {
 
 	// The RapidIdentity roles associated with the user
 	// This does not contain the groups the user is a member of.
-	Roles []string `json:"roles"`
+	Roles StringList `json:"roles"`
 
 	// When the session was created.
 	Created time.Time `json:"created"`
@@ -240,7 +249,7 @@ type SessionInfo struct {
 
 type ProxyData struct {
 	// The RapidIdentity roles of the user who initiated the proxy
-	Permissions []string `json:"permissions"`
+	Permissions StringList `json:"permissions"`
 }
 
 // Client to make RapidIdentity REST API Calls.
