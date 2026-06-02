@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -388,7 +389,7 @@ type SearchConnectActionSetsOutput struct {
 
 type ActionDef struct {
 	// The action set ID.
-	Id string `json:"id" jsonschema:"The action set ID."`
+	Id string `json:"id" jsonschema:"The action set ID. On creation of an action this must be populated with a UUID of the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"`
 
 	// The action set version.
 	Version int `json:"version" jsonschema:"The action set version."`
@@ -466,6 +467,9 @@ type ArgDef struct {
 
 	// The description for the input parameter.
 	Description string `json:"description" jsonschema:"The description for the input parameter."`
+
+	// The value of the input parameter.
+	Value string `json:"value" jsonschema:"The value of the input parameter"`
 }
 
 type ArgDefList []ArgDef
@@ -494,7 +498,7 @@ type ConnectAction struct {
 	Project string `json:"project" jsonschema:"The project where the action resides."`
 
 	// The input parameters for the action.
-	Args ConnectActionArgList `json:"args" jsonschema:"The input parameters for the action."`
+	Args ArgDefList `json:"args" jsonschema:"The input parameters for the action."`
 }
 
 type ConnectActionList []ConnectAction
@@ -506,29 +510,6 @@ func (cal ConnectActionList) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]ConnectAction(cal))
 }
 
-type ConnectActionArg struct {
-	// The name of the input parameter.
-	Name string `json:"name" jsonschema:"The name of the input parameter."`
-
-	// The value of the input parameter.
-	Value string `json:"value" jsonschema:"The value of the input parameter."`
-
-	// The Connect actions.
-	Actions ConnectActionList `json:"actions" jsonschema:"The Connect actions."`
-
-	// The http status code returned.
-	HttpStatus int `json:"httpStatus" jsonschema:"The http status code returned."`
-}
-
-type ConnectActionArgList []ConnectActionArg
-
-func (caal ConnectActionArgList) MarshalJSON() ([]byte, error) {
-	if caal == nil {
-		return []byte("[]"), nil
-	}
-	return json.Marshal([]ConnectActionArg(caal))
-}
-
 type GetConnectActionByIdInput struct {
 	// The Connect action ID, or name. The
 	// name is in the format <project>.<name>
@@ -537,6 +518,14 @@ type GetConnectActionByIdInput struct {
 	// Whether to return full action details
 	// or just metadata.
 	MetaDataOnly bool `json:"metaDataOnly" jsonschema:"Whether to return full action details or just metadata."`
+}
+
+type SaveConnectActionInput struct {
+	Action ActionDef `json:"action" jsonschema:"The action to save or update. When updating an existing action set the version number must be the one provided to you in a Connect action query."`
+}
+
+type SaveConnectActionOutput struct {
+	Action ActionDef `json:"action" jsonschema:"The action that was created or updated. The version that is returned is the value of the version when updating the action. If there is a conflict, query the action and ensure the version number is correct"`
 }
 
 // Retrieves actions from Connect.
@@ -799,4 +788,39 @@ func (c *Client) SearchConnectActionSets(ctx context.Context, params SearchConne
 	}
 
 	return &output, nil
+}
+
+// Create or update a Connect Action Set
+//
+//meta:operation POST /admin/connect/actions
+func (c *Client) SaveConnectAction(ctx context.Context, params SaveConnectActionInput) (*SaveConnectActionOutput, error) {
+	url := fmt.Sprintf("%s/admin/connect/actions", c.baseEndpoint)
+	action, err := json.Marshal(params.Action)
+	if err != nil {
+		return nil, err
+	}
+	requestBody := bytes.NewBuffer(action)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+	var output ActionDef
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SaveConnectActionOutput{
+		Action: output,
+	}, nil
 }
