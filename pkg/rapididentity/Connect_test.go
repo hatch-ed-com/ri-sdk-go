@@ -76,7 +76,7 @@ func TestGetConnectActionById(t *testing.T) {
 		t.Errorf("got error %s, want none", err)
 	}
 
-	got := output.Id
+	got := output.Action.Id
 	want := input.Id
 
 	if got != want {

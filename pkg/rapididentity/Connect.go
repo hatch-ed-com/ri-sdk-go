@@ -520,6 +520,10 @@ type GetConnectActionByIdInput struct {
 	MetaDataOnly bool `json:"metaDataOnly" jsonschema:"Whether to return full action details or just metadata."`
 }
 
+type GetConnectActionByIdOutput struct {
+	Action ActionDef `json:"action" jsonschema:"The action that was retrieved based on the name of id. The version that is returned is the value of the version when updating the action. If there is a conflict, query the action and ensure the version number is correct"`
+}
+
 type SaveConnectActionInput struct {
 	Action ActionDef `json:"action" jsonschema:"The action to save or update. When updating an existing action set the version number must be the one provided to you in a Connect action query."`
 }
@@ -567,7 +571,7 @@ func (c *Client) GetConnectActions(ctx context.Context, params GetConnectActions
 // Retrieves a Connect action by name or ID.
 //
 //meta:operation GET /admin/connect/actions/{nameOrId}
-func (c *Client) GetConnectActionById(ctx context.Context, params GetConnectActionByIdInput) (*ActionDef, error) {
+func (c *Client) GetConnectActionById(ctx context.Context, params GetConnectActionByIdInput) (*GetConnectActionByIdOutput, error) {
 	var output ActionDef
 
 	url := fmt.Sprintf("%s/admin/connect/actions/%s?metaDataOnly=%t", c.baseEndpoint, params.Id, params.MetaDataOnly)
@@ -590,7 +594,9 @@ func (c *Client) GetConnectActionById(ctx context.Context, params GetConnectActi
 		return nil, err
 	}
 
-	return &output, nil
+	return &GetConnectActionByIdOutput{
+		Action: output,
+	}, nil
 }
 
 // Retrieves file content from a file within the Connect files
