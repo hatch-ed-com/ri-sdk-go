@@ -529,6 +529,16 @@ func (caal ConnectActionArgList) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]ConnectActionArg(caal))
 }
 
+type GetConnectActionByIdInput struct {
+	// The Connect action ID, or name. The
+	// name is in the format <project>.<name>
+	Id string `json:"id" jsonschema:"The unique Connect action ID or name."`
+
+	// Whether to return full action details
+	// or just metadata.
+	MetaDataOnly bool `json:"metaDataOnly" jsonschema:"Whether to return full action details or just metadata."`
+}
+
 // Retrieves actions from Connect.
 //
 //meta:operation GET /admin/connect/actions
@@ -543,6 +553,35 @@ func (c *Client) GetConnectActions(ctx context.Context, params GetConnectActions
 			url = fmt.Sprintf("%s&project=%s", url, params.Project)
 		}
 	}
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+// Retrieves a Connect action by name or ID.
+//
+//meta:operation GET /admin/connect/actions/{nameOrId}
+func (c *Client) GetConnectActionById(ctx context.Context, params GetConnectActionByIdInput) (*ActionDef, error) {
+	var output ActionDef
+
+	url := fmt.Sprintf("%s/admin/connect/actions/%s?metaDataOnly=%t", c.baseEndpoint, params.Id, params.MetaDataOnly)
 	req, err := c.GenerateRequest(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err

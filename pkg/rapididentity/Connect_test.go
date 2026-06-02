@@ -43,6 +43,46 @@ func TestGetConnectActions(t *testing.T) {
 	}
 }
 
+func TestGetConnectActionById(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/actions/{nameOrId}", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		testQueryParam(t, r, "metaDataOnly", "true")
+		nameOrId := r.PathValue("nameOrId")
+		if nameOrId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "a name or id is required")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`{ 
+				"id": "%s"
+			}`,
+			nameOrId,
+		)
+	})
+
+	input := GetConnectActionByIdInput{
+		Id:           "1234",
+		MetaDataOnly: true,
+	}
+	ctx := context.Background()
+	output, err := client.GetConnectActionById(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Id
+	want := input.Id
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
 func TestGetConnectFiles(t *testing.T) {
 	t.Parallel()
 	client, mux := setup(t)
