@@ -1,6 +1,7 @@
 package rapididentity
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -388,7 +389,7 @@ type SearchConnectActionSetsOutput struct {
 
 type ActionDef struct {
 	// The action set ID.
-	Id string `json:"id" jsonschema:"The action set ID."`
+	Id string `json:"id" jsonschema:"The action set ID. On creation of an action this must be populated with a UUID of the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"`
 
 	// The action set version.
 	Version int `json:"version" jsonschema:"The action set version."`
@@ -466,6 +467,9 @@ type ArgDef struct {
 
 	// The description for the input parameter.
 	Description string `json:"description" jsonschema:"The description for the input parameter."`
+
+	// The value of the input parameter.
+	Value string `json:"value" jsonschema:"The value of the input parameter"`
 }
 
 type ArgDefList []ArgDef
@@ -494,7 +498,7 @@ type ConnectAction struct {
 	Project string `json:"project" jsonschema:"The project where the action resides."`
 
 	// The input parameters for the action.
-	Args ConnectActionArgList `json:"args" jsonschema:"The input parameters for the action."`
+	Args ArgDefList `json:"args" jsonschema:"The input parameters for the action."`
 }
 
 type ConnectActionList []ConnectAction
@@ -506,27 +510,46 @@ func (cal ConnectActionList) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]ConnectAction(cal))
 }
 
-type ConnectActionArg struct {
-	// The name of the input parameter.
-	Name string `json:"name" jsonschema:"The name of the input parameter."`
+type GetConnectActionByIdInput struct {
+	// The Connect action ID, or name. The
+	// name is in the format <project>.<name>.
+	// <project>. can be ommitted if referencing
+	// the <Main> project
+	Id string `json:"id" jsonschema:"The unique Connect action ID or name. The name is in the format <project>.<name>. \"<project>.\" can be ommitted if referencing the <Main> project"`
 
-	// The value of the input parameter.
-	Value string `json:"value" jsonschema:"The value of the input parameter."`
-
-	// The Connect actions.
-	Actions ConnectActionList `json:"actions" jsonschema:"The Connect actions."`
-
-	// The http status code returned.
-	HttpStatus int `json:"httpStatus" jsonschema:"The http status code returned."`
+	// Whether to return full action details
+	// or just metadata.
+	MetaDataOnly bool `json:"metaDataOnly" jsonschema:"Whether to return full action details or just metadata."`
 }
 
-type ConnectActionArgList []ConnectActionArg
+type GetConnectActionByIdOutput struct {
+	Action ActionDef `json:"action" jsonschema:"The action that was retrieved based on the name of id. The version that is returned is the value of the version when updating the action. If there is a conflict, query the action and ensure the version number is correct"`
+}
 
-func (caal ConnectActionArgList) MarshalJSON() ([]byte, error) {
-	if caal == nil {
-		return []byte("[]"), nil
-	}
-	return json.Marshal([]ConnectActionArg(caal))
+type SaveConnectActionInput struct {
+	Action ActionDef `json:"action" jsonschema:"The action to save or update. When updating an existing action set the version number must be the one provided to you in a Connect action query."`
+}
+
+type SaveConnectActionOutput struct {
+	Action ActionDef `json:"action" jsonschema:"The action that was created or updated. The version that is returned is the value of the version when updating the action. If there is a conflict, query the action and ensure the version number is correct"`
+}
+
+type OperationStatus struct {
+	Success    bool   `json:"success" jsonschema:"Whether the operation was successful."`
+	Message    string `json:"message" jsonschema:"Information regarding why the operation was successful or not"`
+	HttpStatus int    `json:"httpStatus" jsonschema:"The http status code"`
+}
+
+type DeleteConnectActionByIdInput struct {
+	// The Connect action ID, or name. The
+	// name is in the format <project>.<name>.
+	// <project>. can be ommitted if referencing
+	// the <Main> project
+	Id string `json:"id" jsonschema:"The unique Connect action ID or name. The name is in the format <project>.<name>. \"<project>.\" can be ommitted if referencing the <Main> project"`
+}
+
+type DeleteConnectActionByIdOutput struct {
+	DeleteOperationStatus OperationStatus `json:"deleteOperationStatus" jsonschema:"The result of the Connect action delete operation."`
 }
 
 // Retrieves actions from Connect.
@@ -563,6 +586,37 @@ func (c *Client) GetConnectActions(ctx context.Context, params GetConnectActions
 	}
 
 	return &output, nil
+}
+
+// Retrieves a Connect action by name or ID.
+//
+//meta:operation GET /admin/connect/actions/{nameOrId}
+func (c *Client) GetConnectActionById(ctx context.Context, params GetConnectActionByIdInput) (*GetConnectActionByIdOutput, error) {
+	var output ActionDef
+
+	url := fmt.Sprintf("%s/admin/connect/actions/%s?metaDataOnly=%t", c.baseEndpoint, params.Id, params.MetaDataOnly)
+	req, err := c.GenerateRequest(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GetConnectActionByIdOutput{
+		Action: output,
+	}, nil
 }
 
 // Retrieves file content from a file within the Connect files
@@ -760,4 +814,70 @@ func (c *Client) SearchConnectActionSets(ctx context.Context, params SearchConne
 	}
 
 	return &output, nil
+}
+
+// Create or update a Connect Action Set
+//
+//meta:operation POST /admin/connect/actions
+func (c *Client) SaveConnectAction(ctx context.Context, params SaveConnectActionInput) (*SaveConnectActionOutput, error) {
+	url := fmt.Sprintf("%s/admin/connect/actions", c.baseEndpoint)
+	action, err := json.Marshal(params.Action)
+	if err != nil {
+		return nil, err
+	}
+	requestBody := bytes.NewBuffer(action)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+	var output ActionDef
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SaveConnectActionOutput{
+		Action: output,
+	}, nil
+}
+
+// Deletes a Connect action by name or ID.
+//
+//meta:operation DELETE /admin/connect/actions/{nameOrId}
+func (c *Client) DeleteConnectActionById(ctx context.Context, params DeleteConnectActionByIdInput) (*DeleteConnectActionByIdOutput, error) {
+	var output OperationStatus
+
+	url := fmt.Sprintf("%s/admin/connect/actions/%s", c.baseEndpoint, params.Id)
+	req, err := c.GenerateRequest(ctx, "DELETE", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DeleteConnectActionByIdOutput{
+		DeleteOperationStatus: output,
+	}, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -37,6 +38,46 @@ func TestGetConnectActions(t *testing.T) {
 
 	got := output.Name
 	want := "all"
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestGetConnectActionById(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/actions/{nameOrId}", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		testQueryParam(t, r, "metaDataOnly", "true")
+		nameOrId := r.PathValue("nameOrId")
+		if nameOrId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "a name or id is required")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`{ 
+				"id": "%s"
+			}`,
+			nameOrId,
+		)
+	})
+
+	input := GetConnectActionByIdInput{
+		Id:           "1234",
+		MetaDataOnly: true,
+	}
+	ctx := context.Background()
+	output, err := client.GetConnectActionById(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Action.Id
+	want := input.Id
 
 	if got != want {
 		t.Errorf("got %s. want %s", got, want)
@@ -368,5 +409,114 @@ func TestConnect_MarshalJSON_ZeroValue(t *testing.T) {
 				t.Errorf("detected unexpected 'null' value in marshaled output: %s", result)
 			}
 		})
+	}
+}
+
+func TestSaveConnectAction(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/actions", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Content-Type", "application/json")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		var action ActionDef
+		reqBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+		err = json.Unmarshal(reqBody, &action)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`{
+				"id": "%s"
+			}`,
+			action.Id)
+	})
+
+	input := SaveConnectActionInput{
+		Action: ActionDef{
+			Id:           "A5500922-4C5D-43B8-B407-93B42DEA96E2",
+			Version:      0,
+			Name:         "TestRISDK",
+			Description:  "This is a test from RI SDK",
+			ReturnsValue: false,
+			Actions: ConnectActionList{
+				{
+					Args: ArgDefList{
+						{
+							Description: "The message to be logged",
+							Name:        "message",
+							Type:        "string",
+							Value:       "\"This is a test from the RI SDK\"",
+						},
+						{
+							Description: "The log level (default: INFO)",
+							Name:        "level",
+							Type:        "string",
+							Value:       "\"WARN\"",
+						},
+					},
+					Id:   "7F3F77A5-737E-4036-A75D-8DD39A336ED1",
+					Name: "log",
+				},
+			},
+		},
+	}
+
+	ctx := context.Background()
+	output, err := client.SaveConnectAction(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Action.Id
+	want := input.Action.Id
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
+func TestDeleteConnectActionById(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/actions/{nameOrId}", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		nameOrId := r.PathValue("nameOrId")
+		if nameOrId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "a name or id is required")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,
+			`{ 
+				"success": true
+			}`,
+		)
+	})
+
+	input := DeleteConnectActionByIdInput{
+		Id: "1234",
+	}
+	ctx := context.Background()
+	output, err := client.DeleteConnectActionById(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.DeleteOperationStatus.Success
+	want := true
+
+	if got != want {
+		t.Errorf("got %t. want %t", got, want)
 	}
 }
