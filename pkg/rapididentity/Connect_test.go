@@ -483,3 +483,40 @@ func TestSaveConnectAction(t *testing.T) {
 		t.Errorf("got %s. want %s", got, want)
 	}
 }
+
+func TestDeleteConnectActionById(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/actions/{nameOrId}", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+		nameOrId := r.PathValue("nameOrId")
+		if nameOrId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "a name or id is required")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w,
+			`{ 
+				"success": true
+			}`,
+		)
+	})
+
+	input := DeleteConnectActionByIdInput{
+		Id: "1234",
+	}
+	ctx := context.Background()
+	output, err := client.DeleteConnectActionById(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.DeleteOperationStatus.Success
+	want := true
+
+	if got != want {
+		t.Errorf("got %t. want %t", got, want)
+	}
+}

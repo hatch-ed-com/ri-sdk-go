@@ -512,8 +512,10 @@ func (cal ConnectActionList) MarshalJSON() ([]byte, error) {
 
 type GetConnectActionByIdInput struct {
 	// The Connect action ID, or name. The
-	// name is in the format <project>.<name>
-	Id string `json:"id" jsonschema:"The unique Connect action ID or name."`
+	// name is in the format <project>.<name>.
+	// <project>. can be ommitted if referencing
+	// the <Main> project
+	Id string `json:"id" jsonschema:"The unique Connect action ID or name. The name is in the format <project>.<name>. \"<project>.\" can be ommitted if referencing the <Main> project"`
 
 	// Whether to return full action details
 	// or just metadata.
@@ -530,6 +532,24 @@ type SaveConnectActionInput struct {
 
 type SaveConnectActionOutput struct {
 	Action ActionDef `json:"action" jsonschema:"The action that was created or updated. The version that is returned is the value of the version when updating the action. If there is a conflict, query the action and ensure the version number is correct"`
+}
+
+type OperationStatus struct {
+	Success    bool   `json:"success" jsonschema:"Whether the operation was successful."`
+	Message    string `json:"message" jsonschema:"Information regarding why the operation was successful or not"`
+	HttpStatus int    `json:"httpStatus" jsonschema:"The http status code"`
+}
+
+type DeleteConnectActionByIdInput struct {
+	// The Connect action ID, or name. The
+	// name is in the format <project>.<name>.
+	// <project>. can be ommitted if referencing
+	// the <Main> project
+	Id string `json:"id" jsonschema:"The unique Connect action ID or name. The name is in the format <project>.<name>. \"<project>.\" can be ommitted if referencing the <Main> project"`
+}
+
+type DeleteConnectActionByIdOutput struct {
+	DeleteOperationStatus OperationStatus `json:"deleteOperationStatus" jsonschema:"The result of the Connect action delete operation."`
 }
 
 // Retrieves actions from Connect.
@@ -828,5 +848,36 @@ func (c *Client) SaveConnectAction(ctx context.Context, params SaveConnectAction
 
 	return &SaveConnectActionOutput{
 		Action: output,
+	}, nil
+}
+
+// Deletes a Connect action by name or ID.
+//
+//meta:operation DELETE /admin/connect/actions/{nameOrId}
+func (c *Client) DeleteConnectActionById(ctx context.Context, params DeleteConnectActionByIdInput) (*DeleteConnectActionByIdOutput, error) {
+	var output OperationStatus
+
+	url := fmt.Sprintf("%s/admin/connect/actions/%s", c.baseEndpoint, params.Id)
+	req, err := c.GenerateRequest(ctx, "DELETE", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DeleteConnectActionByIdOutput{
+		DeleteOperationStatus: output,
 	}, nil
 }
