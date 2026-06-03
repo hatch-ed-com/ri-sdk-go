@@ -145,6 +145,69 @@ func TestRunUserQuery(t *testing.T) {
 	}
 }
 
+func TestSetPassword(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/profiles/actions/password", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Content-Type", "application/json")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+
+		var input SetPasswordInput
+		reqBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(reqBody, &input)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`[
+				{
+					"target": "%s",
+					"success": true,
+					"targetName": "Jackson Dart"
+				}
+			]`,
+			input.Targets[0],
+		)
+	})
+
+	input := SetPasswordInput{
+		IsSelfService: false,
+		DelegationId:  "f9710f60-4fe7-405e-91cd-9c9ae88466ab",
+		MustUpdate:    false,
+		Targets:       []string{"019e4ba9-95aa-7a17-b15d-0e1c8ca70467"},
+		NewPassword:   "password123",
+	}
+
+	ctx := context.Background()
+	output, err := client.SetPassword(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	if len(output) != 1 {
+		t.Errorf("got %d results, want 1", len(output))
+	}
+
+	got := output[0].Target
+	want := input.Targets[0]
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+
+	if !output[0].Success {
+		t.Errorf("got success false, want true")
+	}
+}
+
 func TestPeople_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
