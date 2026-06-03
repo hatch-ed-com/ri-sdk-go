@@ -501,6 +501,17 @@ type ConnectAction struct {
 	Args ArgDefList `json:"args" jsonschema:"The input parameters for the action."`
 }
 
+// Input for running a Connect action.
+type RunConnectActionInput struct {
+	Action ConnectAction `json:"action" jsonschema:"The Connect action to run."`
+}
+
+// Output for running a Connect action.
+type RunConnectActionOutput struct {
+	// The HTML log of the action run.
+	Log string `json:"log" jsonschema:"The HTML log of the action run."`
+}
+
 type ConnectActionList []ConnectAction
 
 func (cal ConnectActionList) MarshalJSON() ([]byte, error) {
@@ -848,6 +859,37 @@ func (c *Client) SaveConnectAction(ctx context.Context, params SaveConnectAction
 
 	return &SaveConnectActionOutput{
 		Action: output,
+	}, nil
+}
+
+// Runs a Connect action set and returns the HTML log.
+//
+//meta:operation POST /admin/connect/run
+func (c *Client) RunConnectAction(ctx context.Context, params RunConnectActionInput) (*RunConnectActionOutput, error) {
+	url := fmt.Sprintf("%s/admin/connect/run", c.baseEndpoint)
+	action, err := json.Marshal(params.Action)
+	if err != nil {
+		return nil, err
+	}
+	requestBody := bytes.NewBuffer(action)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Set("Accept", "text/html")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RunConnectActionOutput{
+		Log: string(resBody),
 	}, nil
 }
 
