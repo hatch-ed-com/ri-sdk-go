@@ -484,6 +484,65 @@ func TestSaveConnectAction(t *testing.T) {
 	}
 }
 
+func TestRunConnectAction(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/admin/connect/run", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Content-Type", "application/json")
+		testHeader(t, r, "Accept", "text/html")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+
+		var action ConnectAction
+		reqBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+		err = json.Unmarshal(reqBody, &action)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err)
+			return
+		}
+
+		if action.Name != "Test" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "expected name Test")
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "<html><body>Log</body></html>")
+	})
+
+	input := RunConnectActionInput{
+		Action: ConnectAction{
+			Name: "Test",
+			Args: ArgDefList{
+				{
+					Name:  "t",
+					Value: "\" Hello\"",
+				},
+			},
+		},
+	}
+
+	ctx := context.Background()
+	output, err := client.RunConnectAction(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Log
+	want := "<html><body>Log</body></html>"
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
 func TestDeleteConnectActionById(t *testing.T) {
 	t.Parallel()
 	client, mux := setup(t)
