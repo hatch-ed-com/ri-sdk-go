@@ -265,6 +265,40 @@ type RunUserQueryInput struct {
 	Query AuditReportQuery `json:"query" jsonschema:"The user query to run."`
 }
 
+// Input for setting the RapidIdentity Password for the user via delegations.
+type SetPasswordInput struct {
+	// Whether the password change is self-service.
+	IsSelfService bool `json:"isSelfService" jsonschema:"Whether the password change is self-service."`
+	// The delegation ID to use for the password change.
+	DelegationId string `json:"delegationId" jsonschema:"The delegation ID to use for the password change."`
+	// Whether the user must update their password on next login.
+	MustUpdate bool `json:"mustUpdate" jsonschema:"Whether the user must update their password on next login."`
+	// The idautoIDs of the target users.
+	Targets StringList `json:"targets" jsonschema:"The idautoIDs of the target users."`
+	// The new password for the user.
+	NewPassword string `json:"newPassword" jsonschema:"The new password for the user."`
+}
+
+// Result of a password change for a target user.
+type SetPasswordResult struct {
+	// The idautoID of the target user.
+	Target string `json:"target" jsonschema:"The idautoID of the target user."`
+	// Whether the password change was successful.
+	Success bool `json:"success" jsonschema:"Whether the password change was successful."`
+	// The name of the target user.
+	TargetName string `json:"targetName" jsonschema:"The name of the target user."`
+}
+
+// Output of setting the RapidIdentity Password for the user via delegations.
+type SetPasswordOutput []SetPasswordResult
+
+func (spo SetPasswordOutput) MarshalJSON() ([]byte, error) {
+	if spo == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]SetPasswordResult(spo))
+}
+
 // Gets all associated delegations and profiles for the user
 // based on their idautoID. This method will only return
 // delegations and profiles that the invoking session has access.
@@ -348,6 +382,47 @@ func (c *Client) RunUserQuery(ctx context.Context, params RunUserQueryInput) (Us
 		url = fmt.Sprintf("%s&did=%s", url, field)
 	}
 	requestBody := bytes.NewBuffer(query)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, RapidIdentityError{
+			Method:  req.Method,
+			ReqUrl:  req.URL,
+			Message: string(resBody),
+			Reason:  err.Error(),
+			Code:    res.StatusCode,
+		}
+	}
+
+	return output, nil
+}
+
+// Sets the RapidIdentity Password for the user via delegations.
+//
+//meta:operation POST /profiles/actions/password
+func (c *Client) SetPassword(ctx context.Context, params SetPasswordInput) (SetPasswordOutput, error) {
+	var output SetPasswordOutput
+
+	url := fmt.Sprintf("%s/profiles/actions/password", c.baseEndpoint)
+	body, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+	requestBody := bytes.NewBuffer(body)
 	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
 	if err != nil {
 		return nil, err
