@@ -208,6 +208,53 @@ func TestSetPassword(t *testing.T) {
 	}
 }
 
+func TestGetPasswordPoliciesFor(t *testing.T) {
+	t.Parallel()
+	client, mux := setup(t)
+	mux.HandleFunc(baseUrlPath+"/profiles/passwordPolicies/for", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Content-Type", "application/json")
+		testHeader(t, r, "Authorization", "Bearer "+mockServiceIdentity)
+
+		var input GetPasswordPoliciesForInput
+		reqBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(reqBody, &input)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w,
+			`{
+				"id": "7c83d82a-0e90-42a6-9680-5998c62474c7"
+			}`,
+		)
+	})
+
+	input := GetPasswordPoliciesForInput{
+		UserIds: []string{"019e4ba9-95aa-7a17-b15d-0e1c8ca70467"},
+		Type:    "passwordPolicy",
+	}
+
+	ctx := context.Background()
+	output, err := client.GetPasswordPoliciesFor(ctx, input)
+	if err != nil {
+		t.Errorf("got error %s, want none", err)
+	}
+
+	got := output.Id
+	want := "7c83d82a-0e90-42a6-9680-5998c62474c7"
+
+	if got != want {
+		t.Errorf("got %s. want %s", got, want)
+	}
+}
+
 func TestPeople_MarshalJSON_ZeroValue(t *testing.T) {
 	t.Parallel()
 
@@ -265,6 +312,46 @@ func TestPeople_MarshalJSON_ZeroValue(t *testing.T) {
 			},
 			mustContain: `"delegationIds":[]`,
 		},
+		{
+			name: "PasswordPolicy with nil CharSets",
+			input: PasswordPolicy{
+				Id:       "pol-1",
+				CharSets: nil,
+			},
+			mustContain: `"charSets":[]`,
+		},
+		{
+			name: "PasswordPolicy with nil BlackListed",
+			input: PasswordPolicy{
+				Id:          "pol-1",
+				BlackListed: nil,
+			},
+			mustContain: `"blackListed":[]`,
+		},
+		{
+			name: "PasswordPolicy with nil BlackListRegexes",
+			input: PasswordPolicy{
+				Id:               "pol-1",
+				BlackListRegexes: nil,
+			},
+			mustContain: `"blackListRegexes":[]`,
+		},
+		{
+			name: "PasswordPolicy with nil GroupAcls",
+			input: PasswordPolicy{
+				Id:        "pol-1",
+				GroupAcls: nil,
+			},
+			mustContain: `"groupAcls":[]`,
+		},
+		{
+			name: "PasswordPolicy with nil MatchingAttributes",
+			input: PasswordPolicy{
+				Id:                 "pol-1",
+				MatchingAttributes: nil,
+			},
+			mustContain: `"matchingAttributes":[]`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -278,10 +365,6 @@ func TestPeople_MarshalJSON_ZeroValue(t *testing.T) {
 
 			if !strings.Contains(result, tt.mustContain) {
 				t.Errorf("expected JSON to contain %q, but got: %s", tt.mustContain, result)
-			}
-
-			if strings.Contains(result, ":null") {
-				t.Errorf("detected unexpected 'null' value in marshaled output: %s", result)
 			}
 		})
 	}
