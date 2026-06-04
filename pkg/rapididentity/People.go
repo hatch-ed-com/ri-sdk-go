@@ -299,6 +299,168 @@ func (spo SetPasswordOutput) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]SetPasswordResult(spo))
 }
 
+// Input for retrieving password policies for specified users.
+type GetPasswordPoliciesForInput struct {
+	// The idautoIDs of the target users.
+	UserIds StringList `json:"userIds" jsonschema:"The idautoIDs of the target users."`
+	// The type of policy to retrieve. Default is "passwordPolicy".
+	Type string `json:"type" jsonschema:"The type of policy to retrieve. Default is \"passwordPolicy\"."`
+}
+
+type CharSetList []CharSet
+
+func (csl CharSetList) MarshalJSON() ([]byte, error) {
+	if csl == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]CharSet(csl))
+}
+
+type PasswordPolicyAttributeList []PasswordPolicyAttribute
+
+func (ppal PasswordPolicyAttributeList) MarshalJSON() ([]byte, error) {
+	if ppal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]PasswordPolicyAttribute(ppal))
+}
+
+type GroupAclList []GroupAcl
+
+func (gal GroupAclList) MarshalJSON() ([]byte, error) {
+	if gal == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]GroupAcl(gal))
+}
+
+// Password Policy details.
+type PasswordPolicy struct {
+	// The ID of the password policy.
+	Id string `json:"id" jsonschema:"The ID of the password policy."`
+	// The version of the password policy.
+	Version int `json:"version" jsonschema:"The version of the password policy."`
+	// The name of the password policy.
+	Name string `json:"name" jsonschema:"The name of the password policy."`
+	// The description of the password policy.
+	Description string `json:"description" jsonschema:"The description of the password policy."`
+	// The priority of the password policy.
+	Priority int `json:"priority" jsonschema:"The priority of the password policy."`
+	// Whether the password policy is enabled.
+	Enabled bool `json:"enabled" jsonschema:"Whether the password policy is enabled."`
+	// Whether this is the default password policy.
+	Default bool `json:"default" jsonschema:"Whether this is the default password policy."`
+	// Whether group ACLs are enabled.
+	GroupAclsEnabled bool `json:"groupAclsEnabled" jsonschema:"Whether group ACLs are enabled."`
+	// The list of group ACLs.
+	GroupAcls GroupAclList `json:"groupAcls" jsonschema:"The list of group ACLs."`
+	// Whether filter ACL is enabled.
+	FilterAclEnabled bool `json:"filterAclEnabled" jsonschema:"Whether filter ACL is enabled."`
+	// The filter ACL expression.
+	FilterAcl string `json:"filterAcl" jsonschema:"The filter ACL expression."`
+	// The password reset attribute.
+	PasswordResetAttribute PasswordPolicyAttribute `json:"passwordResetAttribute" jsonschema:"The password reset attribute."`
+	// The minimum length of the password.
+	MinLength int `json:"minLength" jsonschema:"The minimum length of the password."`
+	// The maximum length of the password.
+	MaxLength int `json:"maxLength" jsonschema:"The maximum length of the password."`
+	// The character sets required for the password policy.
+	CharSets CharSetList `json:"charSets" jsonschema:"The character sets required for the password policy."`
+	// The number of required character sets.
+	RequiredCharSets int `json:"requiredCharSets" jsonschema:"The number of required character sets."`
+	// Whether random passwords are allowed.
+	AllowRandomPassword bool `json:"allowRandomPassword" jsonschema:"Whether random passwords are allowed."`
+	// The regex pattern for allowed characters.
+	AllowedCharacterRegex string `json:"allowedCharacterRegex" jsonschema:"The regex pattern for allowed characters."`
+	// The list of attributes to match against the password.
+	MatchingAttributes PasswordPolicyAttributeList `json:"matchingAttributes" jsonschema:"The list of attributes to match against the password."`
+	// Whether matching attributes are case sensitive.
+	MatchingAttributesCaseSensitive bool `json:"matchingAttributesCaseSensitive" jsonschema:"Whether matching attributes are case sensitive."`
+	// Whether matching attributes must match the entire string.
+	MatchingAttributesMatchEntire bool `json:"matchingAttributesMatchEntire" jsonschema:"Whether matching attributes must match the entire string."`
+	// The list of blacklisted passwords.
+	BlackListed StringList `json:"blackListed" jsonschema:"The list of blacklisted passwords."`
+	// Whether the blacklist is case sensitive.
+	BlackListCaseSensitive bool `json:"blackListCaseSensitive" jsonschema:"Whether the blacklist is case sensitive."`
+	// Whether the blacklist must match the entire string.
+	BlackListMatchEntire bool `json:"blackListMatchEntire" jsonschema:"Whether the blacklist must match the entire string."`
+	// The list of blacklisted regexes.
+	BlackListRegexes StringList `json:"blackListRegexes" jsonschema:"The list of blacklisted regexes."`
+	// Whether users must change their password by default.
+	DefaultForceUserPasswordChange bool `json:"defaultForceUserPasswordChange" jsonschema:"Whether users must change their password by default."`
+	// Whether to hide the force password change option.
+	HideForceUserPasswordChange bool `json:"hideForceUserPasswordChange" jsonschema:"Whether to hide the force password change option."`
+	// Whether to enforce AD complexity attributes.
+	EnforceADComplexityAttributes bool `json:"enforceADComplexityAttributes" jsonschema:"Whether to enforce AD complexity attributes."`
+	// Whether to enforce password history on admin reset.
+	EnforcePasswordHistoryAdminReset bool `json:"enforcePasswordHistoryAdminReset" jsonschema:"Whether to enforce password history on admin reset."`
+	// Whether the policy can be overridden by a delegated policy.
+	DelegatedPolicyOverride bool `json:"delegatedPolicyOverride" jsonschema:"Whether the policy can be overridden by a delegated policy."`
+	// The screening configuration for the password policy.
+	ScreeningConfig ScreeningConfig `json:"screeningConfig" jsonschema:"The screening configuration for the password policy."`
+	// The number of previous passwords to remember.
+	PasswordRememberedCount int `json:"passwordRememberedCount" jsonschema:"The number of previous passwords to remember."`
+	// The maximum age of a password in days.
+	PasswordMaximumAgeDays int `json:"passwordMaximumAgeDays" jsonschema:"The maximum age of a password in days."`
+	// The number of days before expiration to start warning the user.
+	ExpirationWarningDays int `json:"expirationWarningDays" jsonschema:"The number of days before expiration to start warning the user."`
+	// The maximum number of failed login attempts allowed.
+	MaxFailedAttempts int `json:"maxFailedAttempts" jsonschema:"The maximum number of failed login attempts allowed."`
+	// The window in minutes for failed attempts.
+	FailedAttemptsWindow int `json:"failedAttemptsWindow" jsonschema:"The window in minutes for failed attempts."`
+	// The duration of account lockout in minutes.
+	AccountLockoutDuration int `json:"accountLockoutDuration" jsonschema:"The duration of account lockout in minutes."`
+}
+
+type GroupAcl struct {
+	// The ID of the group.
+	Id string `json:"id" jsonschema:"The ID of the group."`
+	// The name of the group.
+	Name string `json:"name" jsonschema:"The name of the group."`
+	// The description of the group.
+	Description string `json:"description" jsonschema:"The description of the group."`
+}
+
+type PasswordPolicyAttribute struct {
+	// The ID of the attribute.
+	Id string `json:"id" jsonschema:"The ID of the attribute."`
+	// The friendly name of the attribute.
+	FriendlyName string `json:"friendlyName" jsonschema:"The friendly name of the attribute."`
+	// Whether the attribute is searchable.
+	Searchable bool `json:"searchable" jsonschema:"Whether the attribute is searchable."`
+	// Whether the attribute is multi-valued (Legacy).
+	MultiValued bool `json:"multiValued" jsonschema:"Whether the attribute is multi-valued (Legacy)."`
+	// Whether the attribute allows multiple values.
+	AllowMultiValue bool `json:"allowMultiValue" jsonschema:"Whether the attribute allows multiple values."`
+	// The type of the attribute.
+	Type string `json:"type" jsonschema:"The type of the attribute."`
+}
+
+type ScreeningConfig struct {
+	// Whether screening is enabled.
+	Enabled bool `json:"enabled" jsonschema:"Whether screening is enabled."`
+	// The error message to display when screening fails.
+	ErrorMessage string `json:"errorMessage" jsonschema:"The error message to display when screening fails."`
+	// The configuration for the screening type.
+	TypeConfig TypeConfig `json:"typeConfig" jsonschema:"The configuration for the screening type."`
+}
+
+type TypeConfig struct {
+	// The type of screening.
+	Type string `json:"@type" jsonschema:"The type of screening."`
+}
+
+type CharSet struct {
+	// The ID of the character set.
+	Id string `json:"id" jsonschema:"The ID of the character set."`
+	// The type of the character set.
+	Type string `json:"type" jsonschema:"The type of the character set."`
+	// The minimum number of characters from this set.
+	Min int `json:"min" jsonschema:"The minimum number of characters from this set."`
+	// The maximum number of characters from this set.
+	Max int `json:"max" jsonschema:"The maximum number of characters from this set."`
+}
+
 // Gets all associated delegations and profiles for the user
 // based on their idautoID. This method will only return
 // delegations and profiles that the invoking session has access.
@@ -450,4 +612,46 @@ func (c *Client) SetPassword(ctx context.Context, params SetPasswordInput) (SetP
 	}
 
 	return output, nil
+}
+
+// Retrieves the password policy for specified users.
+//
+//meta:operation POST /profiles/passwordPolicies/for
+func (c *Client) GetPasswordPoliciesFor(ctx context.Context, params GetPasswordPoliciesForInput) (*PasswordPolicy, error) {
+	var output PasswordPolicy
+	params.Type = cmp.Or(params.Type, "passwordPolicy")
+
+	url := fmt.Sprintf("%s/profiles/passwordPolicies/for", c.baseEndpoint)
+	body, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+	requestBody := bytes.NewBuffer(body)
+	req, err := c.GenerateRequest(ctx, "POST", url, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := c.ReceiveResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(resBody, &output)
+	if err != nil {
+		return nil, RapidIdentityError{
+			Method:  req.Method,
+			ReqUrl:  req.URL,
+			Message: string(resBody),
+			Reason:  err.Error(),
+			Code:    res.StatusCode,
+		}
+	}
+
+	return &output, nil
 }
