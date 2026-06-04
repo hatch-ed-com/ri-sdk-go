@@ -457,19 +457,29 @@ func (adl ActionDefList) MarshalJSON() ([]byte, error) {
 
 type ArgDef struct {
 	// Whether the action set input parameter is optional.
-	Optional bool `json:"optional" jsonschema:"Whether the action set input parameter is optional."`
+	Optional bool `json:"optional,omitempty" jsonschema:"Whether the action set input parameter is optional."`
 
 	// The type of the input parameter
-	Type string `json:"type" jsonschema:"The type of the input parameter"`
+	Type string `json:"type,omitempty" jsonschema:"The type of the input parameter"`
 
 	// The name of the input parameter.
 	Name string `json:"name" jsonschema:"The name of the input parameter."`
 
 	// The description for the input parameter.
-	Description string `json:"description" jsonschema:"The description for the input parameter."`
+	Description string `json:"description,omitempty" jsonschema:"The description for the input parameter."`
 
 	// The value of the input parameter.
-	Value string `json:"value" jsonschema:"The value of the input parameter"`
+	Value string `json:"value,omitempty" jsonschema:"The value of the input parameter"`
+
+	// The nested actions for container args
+	// such as while, if, section, etc...
+	// This creates a cyclical schema and
+	// could cause issues with jsonschema
+	// libraries that automate jsonschema
+	// creation based on golang structs.
+	// In these situations you will need to
+	// define the schema manually.
+	Actions ConnectActionList `json:"actions,omitempty" jsonschema:"The nested actions for container args such as while, if, section, else"`
 }
 
 type ArgDefList []ArgDef
