@@ -91,7 +91,7 @@ Currently, everything is defined in the main `rapididentity` package. Code is or
 
 ## Maintainer's Guide
 
-(These notes are mostly only for people merging in pull requests.)
+(These notes are only for people merging in pull requests.)
 
 **When creating a release, don't forget to update the `Version` constant in `RapidIdentity.go`.** This is used to
 send the version in the `User-Agent` header to identify clients to the RapidIdentity API.
